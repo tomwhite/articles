@@ -1,0 +1,10 @@
+<java classname="org.tiling.computefarm.samples.squares.SquaresClient" fork="true">
+	<arg value="10" />
+	<jvmarg value="-Djava.security.policy=src/java/policy.all" />
+	<classpath>
+		<pathelement location="${jini.lib}/jini-core.jar" />
+		<pathelement location="${jini.lib}/jini-ext.jar" />
+		<pathelement location="${lib}/computefarm-0.8.2.jar" />
+		<pathelement path="${classes}" />
+	</classpath>
+</java>

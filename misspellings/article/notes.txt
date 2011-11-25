@@ -1,0 +1,57 @@
+Matching Misspelled Words
+
+Intro
+
+Some simple distance measures between words
+  Prefix, suffix, substring, Hamming
+
+The soundex algorithm
+  General description and origin
+  Algorithm with a worked example
+  Efficiency
+
+The Levenshtein algorithm
+  General description and origin
+  Algorithm with a worked example
+  Efficiency
+
+Comparison of Levenshtein with soundex
+  Strengths and weaknesses of each, with examples
+
+Combining Levenshtein with soundex
+  The code and examples (peoples' names, place names, dictionary)
+  
+  
+----
+
+Basic interface for distance algorithms
+
+class Dictionary {
+    public String[] getWords();
+}
+
+class ScoredWord {
+    String word
+    int score
+}
+
+interface DistanceAlgorithm {
+    public ScoredWord[] search(String word, Dictionary dictionary);
+}
+
+... for "hash" algorithms
+
+class SoundexAlgorithm {
+    public String[] search(String word);
+    public void setDictionary(Dictionary dictionary);
+}
+
+----
+
+algortihm
+algorith
+consanants
+stips (strips)
+intial
+helful
+

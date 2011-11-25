@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<project name="xmlcatalogs" default="test">
+
+  <path id="jars">
+    <fileset dir="lib">
+      <include name="**/*.jar"/>
+    </fileset>
+    <fileset dir="${jaxp.lib.dir}">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="test">
+    <fail unless="jaxp.lib.dir" message="Please set the JAXP lib directory, by setting the 'jaxp.lib.dir' property on the command line."/>
+  
+    <junit fork="yes">
+      <jvmarg value="-Djava.security.policy=policy"/>
+      <jvmarg value="-Djava.security.manager=org.tiling.xmlcatalog.test.NoNetworkSecurityManager"/>
+      
+      <!-- The following line may be needed to override the built-in JAXP 1.1 classes in JDK 1.4.
+           See http://java.sun.com/webservices/docs/1.3/ReleaseNotes.html for more details. -->
+      <jvmarg value="-Djava.endorsed.dirs=${jaxp.lib.dir}/endorsed"/>
+      
+      <!-- For other JAXP implementations, you may wish to set the following system properties 
+           to suitable values. See http://java.sun.com/developer/EJTechTips/2003/tt0311.html#1. -->
+      <!--
+      <jvmarg value="-Djavax.xml.parsers.SAXParserFactory=com.myco.parsers.MySAXFactory"/>
+      <jvmarg value="-Djavax.xml.parsers.DocumentBuilderFactory=com.myco.parsers.MyDOMFactory"/>
+      <jvmarg value="-Djavax.xml.transform.TransformerFactory=com.myco.transform.MyTransformerFactory"/>
+      -->
+
+      <classpath>
+        <path refid="jars"/>
+        <pathelement path="classes"/>
+      </classpath>
+
+      <formatter type="brief" usefile="false"/>
+
+      <batchtest>
+        <fileset dir="src">
+          <include name="**/*Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+</project>

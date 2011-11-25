@@ -1,0 +1,23 @@
+Notes for re-crawling
+---------------------
+
+Crawl in crawl-tinysite-20060113
+
+copy:
+rm -R crawl-tinysite-20060113.copy/
+cp -Rp crawl-tinysite-20060113/  crawl-tinysite-20060113.copy/
+
+
+look at pages:
+bin/nutch readdb crawl-tinysite-20060113.copy/db -dumppageurl
+
+s=`ls -d crawl-tinysite-20060113.copy/segments/* | head -1`
+bin/nutch segread -dump $s
+
+Edit HTML:
+vi ~/Web/tomcat-instance/webapps/ROOT/tinysite/A.html
+
+Crawl wikiquote:
+
+bin/nutch crawl wikiquote_urls  -dir crawl-wikiquote >& crawl.log.wikiquote
+

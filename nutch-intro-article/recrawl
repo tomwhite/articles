@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# A simple script to run a Nutch re-crawl
+
+if [ -n "$1" ]
+then
+  crawl_dir=$1
+else
+  echo "Usage: recrawl crawl_dir [depth] [adddays]"
+  exit 1
+fi  
+
+if [ -n "$2" ]
+then
+  depth=$2
+else  
+  depth=5
+fi
+
+if [ -n "$3" ]
+then
+  adddays=$3
+else
+  adddays=0
+fi
+
+webdb_dir=$crawl_dir/db
+segments_dir=$crawl_dir/segments
+index_dir=$crawl_dir/index
+
+# The generate/fetch/update cycle
+for ((i=1; i <= depth ; i++))
+do
+  bin/nutch generate $webdb_dir $segments_dir -adddays $adddays
+  segment=`ls -d $segments_dir/* | tail -1`
+  bin/nutch fetch $segment
+  bin/nutch updatedb $webdb_dir $segment
+done
+
+# Update segments
+mkdir tmp
+bin/nutch updatesegs $webdb_dir $segments_dir tmp
+rm -R tmp
+
+# Index segments
+for segment in `ls -d $segments_dir/* | tail -$depth`
+do
+  bin/nutch index $segment
+done
+
+# De-duplicate indexes
+bin/nutch dedup $segments_dir bogus # "bogus' argument is ignored but needed due to a bug in the number of args expected
+
+# Merge indexes
+ls -d $segments_dir/* | xargs bin/nutch merge $index_dir
+

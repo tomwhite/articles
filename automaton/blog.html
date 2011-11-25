@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>A Faster Java Regex Package</title>
+  </head>
+  <body>
+    <p>
+    dk.brics.automaton is a Java regex package whose main claim to fame is that it is significantly faster then all other Java regex libraries, including the one in the JDK. How can this be?
+    </p>
+
+    <p>
+    Anders M&oslash;ller's <a href="http://www.brics.dk/~amoeller/automaton/">dk.brics.automaton</a> is a Java regex
+    package whose main claim to fame is that it is significantly <a href="http://tusker.org/regex/regex_benchmark.html">faster</a>
+    then all other Java regex libraries, including the <code>java.util.regex</code> classes in the JDK.
+    Like many things in computer science, the speed gains come at a price. In this case, the regular expression language supported is not as rich as the Perl 5 syntax that is prevalent in today's tools, including the JDK implementation (which has only <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html#jcc">minor variations</a> from Perl 5). That said, for some applications this trade-off may be worth it. (For example, it is going to be used in <a href="http://lucene.apache.org/nutch/">Nutch</a> - see discussion on this <a href="http://mail-archives.apache.org/mod_mbox/lucene-nutch-dev/200603.mbox/%3c1263a5c70603112259q6da3902fub7b71cb3ba6fb361@mail.gmail.com%3e">thread</a>.) In the rest of this post I shall try to explore this trade-off a bit more.
+    <p>
+
+    <h3>Code Comparison</h3>
+
+    <p>
+    Let's start by looking at how to use the new library. First, here's a JUnit test that does a simple match using the <code>java.util.regex</code> classes:
+    </p>
+
+    <pre><code>public void testJdkRegex() {
+  Pattern p = Pattern.compile("a|ab");
+  Matcher m = p.matcher("ab");
+  assertTrue(m.matches());
+}</code></pre>
+
+    <p>
+    It's possible to do the same in one line: <code>assertTrue("ab".matches("a|ab"))</code>, but I want to compare it with the equivalent using dk.brics.automaton:
+    </p>
+
+    <pre><code>public void testAutomatonRegex() {
+  RegExp re = new RegExp("a|ab");
+  RunAutomaton ra = new RunAutomaton(re.toAutomaton());
+  assertTrue(ra.run("ab"));
+}</code></pre>
+
+    <p>
+    Some of the naming may seem odd: the <code>RunAutomaton</code> class with its <code>run</code> method in place of the <code>Matcher</code> class with its <code>matcher</code> method. This is because dk.brics.automaton is actually a library for Finite-State Automata (FSA) - also known as Finite State Machines - and any regular expression can be implemented as an FSA. Indeed, the <code>RegExp</code> class is simply a vehicle for compiling string representations of regular expressions into <code>Automaton</code> instances. So, the naming can be understood as simply exposing the implementation to the user.
+    </p>
+
+    <h3>Determinism</h3>
+
+    <p>
+    Let's look now at the issue of <i>determinism</i> for this is at the heart of what makes dk.brics.automaton different.
+    </p>
+
+    <p>
+    The regular expression <code>a|ab</code> is compiled into the FSA shown here:
+    </p>
+
+    <p>
+    <img src="a_or_ab.png" alt="The non-deterministic finite-state automaton for the regular expression a|ab" width="421" height="149"/>
+    </p>
+
+    <p>
+    Circles represent <i>states</i>. Arrows represent <i>transitions</i> with the label showing the character that matches. The start state is pointed to by the incoming arrow on the left. End states are shown as double circles. For this FSA you can see the two paths for the matches <i>a</i> and <i>ab</i>.
+    </p>
+
+    <p>
+    This FSA is in fact <i>non-deterministic</i>, known as a Non-deterministic Finite Automaton (NFA). If you are in the start state and you read an <i>a</i> character then there is more than one option to take - you can either take the upper branch or the lower branch. There are various ways of coping with the non-determinism (e.g. look-ahead, or backtracking), but suffice to say, it makes the NFA algorithm more complex. If the FSA is deterministic (a Deterministic Finite Automaton, or DFA), everything is so much easier - and, crucially, so much faster. You have a simple operation to carry out after seeing each character of input: is there a transition that matches? If so, carry on till the end, otherwise stop as the match failed.
+    </p>
+
+    <p>
+    This is the trick that dk.brics.automaton uses. It converts NFAs into DFAs. Here's what it does to <code>a|ab</code>:
+    </p>
+
+    <p>
+    <img src="a_or_ab_determinized.png" alt="The deterministic finite-state automaton for the regular expression a|ab" width="421" height="72"/>
+    </p>
+
+    <p>Now there is only one choice in the start state, so it is deterministic.
+    </p>
+
+    <h3>What Are Regular Expressions Exactly?</h3>
+
+    <p>So what's the catch? Why didn't Sun use the algorithm for converting NFAs to DFAs? FSAs are a great way to implement regular expressions, but unfortunately, the regular expressions we use are quite a bit more advanced than "regular expressions" in the strict theoretical sense. As Jeffrey Friedl says in <a href="http://www.oreilly.com/catalog/regex2/">Mastering Regular Expressions</a>
+    </p>
+
+    <blockquote>
+    ... you should probably stop calling it an NFA, and start using the phrase "nonregular expressions," since that describes (mathematically speaking) the new situation. No one has actually done this, so the <i>name</i> "NFA" has lingered, even though the implementation is no longer (mathematically speaking) an NFA.
+    </blockquote>
+
+    <p>
+    The best example of a feature that has been added to regular expressions is the support for back references. DFAs cannot support back references, so dk.brics.automaton can't support them (see the <a href="http://www.brics.dk/~amoeller/automaton/doc/dk/brics/automaton/RegExp.html">javadoc</a> for the regular expression language that it does support). The JDK regex implementation can, since it is NFA-based.
+    </p>
+
+    <h3>Conclusion</h3>
+
+    <p>
+    The bottom line is that the JDK regex implementation supports a rich set of regular expressions, whereas dk.brics.automaton supports only the basic features. If you are not concerned about speed - for example, you are just doing a few matches on strings of modest length - then use the JDK implementation. However, if regular expressions are a bottleneck in your program and you don't need advanced regex features, then dk.brics.automaton might be a great fit.
+    </p>
+
+    <h3>Resources</h3>
+    <ul>
+    <li>The best introduction I've seen to FSAs, particularly the difference between deterministic and non-deterministic ones, is the second chapter of <a href="http://www.cs.colorado.edu/~martin/slp.html">Speech and Language Processing</a> by Daniel Jurafsky and James H. Martin.</li>
+    <li>If you want to improve your practical regex skills - then Jeffrey Friedl's <a href="http://www.oreilly.com/catalog/regex2/">Mastering Regular Expressions</a> is a must read. It's really good on how to get the best out of a NFA engine.</li>
+    <li>I generated the diagrams using the <code>dot</code> program in <a href="http://www.graphviz.org/">Graphviz</a>, which was very easy, since the <code>Automaton</code> class provides a handy <code>toDot()</code> method.</li>
+    <li>The same issues of determinism and non-determinism are present in XML schemas. (E.g. see this <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/html/cpconnon-deterministicschema.asp">nice summary</a> on MSDN.) <a href="http://www.w3.org/XML/Schema">W3C XML Schemas</a> forbid non-determinism, whereas <a href="http://www.relaxng.org/">RELAX NG</a> schemas don't.</li>
+    <li>Perl 6 <a href="http://www.perl.com/pub/a/2002/06/04/apo5.html">radically re-works</a> regular expressions. Lots of radical ideas here!</li>
+    </ul>
+  </body>
+</html>
+
+<!--
+* Perl 6 regexes
+* Jurafsky and Martin
+* Friedl
+* Javadoc for Java
+* Ulman?
+
+brics is DFA/NFA really is it NFA?
+
+What is Java's?
+
+Regular vs. irregular (capturing)
+Deterministic vs. undeterministic.
+
+Nutch
+XML schema
+toDot
+
+terminology confusion NFA N-FSA?
+
+-->

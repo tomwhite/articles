@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<project name="misspellings" default="test">
+
+  <path id="jars">
+    <fileset dir="lib">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="test">
+    <junit fork="yes">
+      <classpath>
+        <path refid="jars"/>
+        <pathelement path="classes"/>
+      </classpath>
+
+      <formatter type="brief" usefile="false"/>
+
+      <batchtest>
+        <fileset dir="src">
+          <include name="**/*Test.java" />
+					<exclude name="**/Abstract*Test.java"/>          
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+  
+</project>

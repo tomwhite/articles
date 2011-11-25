@@ -1,0 +1,221 @@
+/* --------------------------------------------- */
+/*  AWS Developer Content Styles                 */
+/* --------------------------------------------- */
+
+body, div, p, td, th {
+    font-family: verdana, helvetica, sans-serif, arial;
+    font-size: 12px;
+    color: #000000;
+}
+
+h1 {
+    font-family: verdana, arial, helvetica, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+}
+
+h2 {
+    font-family: verdana, arial, helvetica, sans-serif;
+    font-size: 14px;
+    color: #c60;
+}
+
+h3 {
+    font-family: verdana, arial, helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #333333;
+}
+
+/*code, note, and example styles*/
+pre {
+    font-family: "Courier New", Courier, mono;
+    font-size: 12px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 5px;
+    background-color: #eff7ff;
+    border: 1px dashed #333;
+    overflow: auto;
+    max-height: 500px;
+    margin-right: 20px;		
+}
+
+code {
+    font-family: "Courier New", Courier, mono;
+    font-size: 12px;
+}
+
+/** Admonitions **/
+.aws-note {
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-style: solid;
+    border-right-style: none;
+    border-bottom-style: solid;
+    border-left-style: none;
+    border-top-color: #CCCCCC;
+    border-right-color: #CCCCCC;
+    border-bottom-color: #CCCCCC;
+    border-left-color: #CCCCCC;
+    padding: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+/*table ID selector styles*/
+#aws-table {
+    border-top: 1px solid #cccccc;
+    border-left: 1px solid #cccccc;
+    margin-right: 20px;
+}
+
+#aws-table td {
+    font-size: 12px;
+    padding: 5px 5px 5px 5px;
+    border-bottom: 1px solid #cccccc;
+    border-right: 1px solid #cccccc;
+    vertical-align: top;
+}
+
+#aws-table th {
+    font-size: 12px;
+    padding: 5px 5px 5px 5px;
+    border-bottom: 1px solid #cccccc;
+    border-right: 1px solid #cccccc;
+    vertical-align: top;
+    background-color: #eeeeee;
+    color: #333333;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: left;
+}
+
+
+/*Syntax Highlighting Styles*/
+.dp-highlighter
+{
+    font-family: "Courier New", Courier, mono;
+    font-size: 12px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: #000066;
+    padding: 5px;
+    background-color: #eff7ff;
+    border: 1px dashed #333;
+    width: 99%;
+    overflow: auto;
+    max-height: 500px;
+}
+
+.dp-highlighter ol
+{
+	margin: 0px 0px 1px 0px; /* 1px bottom margin seems to fix occasional Firefox scrolling */
+	padding: 0px;
+	color: #666666;
+	list-style-type: none;
+}
+
+.dp-highlighter.nogutter ol
+{
+	list-style-type: none;
+	margin-left: 0px;
+}
+
+.dp-highlighter ol li, .dp-highlighter .columns div
+{
+	#border-left: 1px solid #000066;
+	background-color: #eff7ff;
+	padding-left: 0px;
+}
+
+.dp-highlighter ol li.alt
+{
+	background-color: #eff7ff;
+}
+
+.dp-highlighter ol li span
+{
+	color: Black;
+}
+
+/* Language specific styles */
+.dp-c {}
+.dp-c .comment { color: #336633; }
+.dp-c .string { color: #000066; }
+.dp-c .preprocessor { color: gray; }
+.dp-c .keyword { color: #000066; }
+.dp-c .vars { color: #000000; }
+.dp-c .func { color: #CC6600; }
+.dp-c .keyword { color: #000066; font-weight: bold; }
+
+.dp-vb {}
+.dp-vb .comment { color: #336633; }
+.dp-vb .string { color: #000066; }
+.dp-vb .preprocessor { color: gray; }
+.dp-vb .keyword { color: #000066; }
+
+.dp-sql {}
+.dp-sql .comment { color: #336633; }
+.dp-sql .string { color: #000066; }
+.dp-sql .keyword { color: #000066; }
+.dp-sql .func { color: #ff1493; }
+.dp-sql .op { color: #808080; }
+
+.dp-xml {}
+.dp-xml .cdata { color: #990000; }
+.dp-xml .comments { color: #336633; }
+.dp-xml .tag { color: #333333; }
+.dp-xml .tag-name { color: #000066;}
+.dp-xml .attribute { color: #CC6600; }
+.dp-xml .attribute-value { color: #000066; }
+
+.dp-delphi {}
+.dp-delphi .comment { color: #336633;}
+.dp-delphi .string { color: #000066; }
+.dp-delphi .number { color: #000; }
+.dp-delphi .directive { color: #008284; }
+.dp-delphi .keyword { font-weight: bold; color: #000066; }
+.dp-delphi .vars { color: #000; }
+
+.dp-py {}
+.dp-py .comment { color: #336633; }
+.dp-py .string { color: #000066; }
+.dp-py .docstring { color: #336633; }
+.dp-py .keyword { color: #000066; font-weight: bold;}
+.dp-py .builtins { color: #000066; }
+.dp-py .magicmethods { color: #808080; }
+.dp-py .exceptions { color: #336633; }
+.dp-py .types { color: #336633; font-style: italic; }
+.dp-py .commonlibs { color: #000066; font-style: italic; }
+
+.dp-rb {}
+.dp-rb .comment { color: #336633; }
+.dp-rb .string  { color: #000066; }
+.dp-rb .symbol  { color: #000066; }
+.dp-rb .keyword { color: #000066; font-weight: bold; }
+.dp-rb .variable { color: #000000; }
+
+.dp-css {}
+.dp-css .comment { color: #336633; }
+.dp-css .string { color: #000066; }
+.dp-css .keyword { color: #000066; font-weight: bold;}
+.dp-css .colors { color: #990000; }
+.dp-css .vars { color: #000000; }
+
+.dp-j {}
+.dp-j .comment { color: #336633; }
+.dp-j .string { color: #000066; }
+.dp-j .keyword { color: #000066; font-weight: bold;}
+.dp-j .annotation { color: #646464; }
+.dp-j .number { color: #C00000; }
+
+.dp-cpp {}
+.dp-cpp .comment { color: #336633; }
+.dp-cpp .string { color: #990000; }
+.dp-cpp .preprocessor { color: #CD00CD; font-weight: bold; }
+.dp-cpp .keyword { color: #000066; font-weight: bold; }
+.dp-cpp .datatypes { color: #2E8B57; font-weight: bold; }

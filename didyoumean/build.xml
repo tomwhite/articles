@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dym" default="article" basedir=".">
+
+	<target name="escapeAndTab4">
+		<replaceregexp file="${file}" match="&amp;" replace="&amp;amp;" flags="g" />
+		<replaceregexp file="${file}" match="&lt;" replace="&amp;lt;" flags="g" />
+		<replaceregexp file="${file}" match="&gt;" replace="&amp;gt;" flags="g" />
+		<replaceregexp file="${file}" match="&quot;" replace="&amp;quot;" flags="g" />
+		<replaceregexp file="${file}" match="&apos;" replace="&amp;apos;" flags="g" />
+		<replaceregexp file="${file}" match="\t" replace="    " flags="g" />
+	</target>
+	
+	<target name="article">
+		<copy file="article_template.html" tofile="article.html" overwrite="true"/>
+
+		<mkdir dir="target"/>
+		<copy todir="target/src">
+			<fileset dir="src"/>
+		</copy>
+
+		<antcall target="escapeAndTab4">
+			<param name="file" value="target/src/java/org/tiling/didyoumean/SearchEngine.java"/>
+		</antcall>
+		<loadfile property="src/java/org/tiling/didyoumean/SearchEngine.java"
+			srcFile="target/src/java/org/tiling/didyoumean/SearchEngine.java"/>
+		<replace file="article.html" token="@@@src/java/org/tiling/didyoumean/SearchEngine.java@@@"
+			value="${src/java/org/tiling/didyoumean/SearchEngine.java}"/>
+
+		<antcall target="escapeAndTab4">
+			<param name="file" value="target/src/java/org/tiling/didyoumean/SearchResult.java"/>
+		</antcall>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/SearchResult.java"
+			match="public SearchResult\(.*return suggestedQuery;[^}]*}"
+			replace=""
+			flags="s"/>
+		<loadfile property="src/java/org/tiling/didyoumean/SearchResult.java"
+			srcFile="target/src/java/org/tiling/didyoumean/SearchResult.java"/>
+		<replace file="article.html" token="@@@src/java/org/tiling/didyoumean/SearchResult.java@@@"
+			value="${src/java/org/tiling/didyoumean/SearchResult.java}"/>
+
+		<antcall target="escapeAndTab4">
+			<param name="file" value="target/src/java/org/tiling/didyoumean/SimpleSearchEngine.java"/>
+		</antcall>
+		<loadfile property="src/java/org/tiling/didyoumean/SimpleSearchEngine.java"
+			srcFile="target/src/java/org/tiling/didyoumean/SimpleSearchEngine.java"/>
+		<replace file="article.html" token="@@@src/java/org/tiling/didyoumean/SimpleSearchEngine.java@@@"
+			value="${src/java/org/tiling/didyoumean/SimpleSearchEngine.java}"/>
+
+		<antcall target="escapeAndTab4">
+			<param name="file" value="target/src/java/org/tiling/didyoumean/DidYouMeanIndexer.java"/>
+		</antcall>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/DidYouMeanIndexer.java"
+			match="import org\.apache\.commons\.cli\..*import org\.apache\.commons\.cli\.ParseException;"
+			replace=""
+			flags="s"/>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/DidYouMeanIndexer.java"
+			match='private static final String DEFAULT_FIELD.*SPELL_INDEX_OPTION = "o";'
+			replace=""
+			flags="s"/>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/DidYouMeanIndexer.java"
+			match='public static void main\(.*return options;[^}]*}'
+			replace=""
+			flags="s"/>
+		<loadfile property="src/java/org/tiling/didyoumean/DidYouMeanIndexer.java"
+			srcFile="target/src/java/org/tiling/didyoumean/DidYouMeanIndexer.java"/>
+		<replace file="article.html" token="@@@src/java/org/tiling/didyoumean/DidYouMeanIndexer.java@@@"
+			value="${src/java/org/tiling/didyoumean/DidYouMeanIndexer.java}"/>
+
+		<antcall target="escapeAndTab4">
+			<param name="file" value="target/src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java"/>
+		</antcall>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java"
+			match="private int minimumHits;"
+			replace="&lt;b&gt;\0"
+			flags="s"/>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java"
+			match="private DidYouMeanParser didYouMeanParser;"
+			replace="\0&lt;/b&gt;"
+			flags="s"/>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java"
+			match="String suggestedQueryString = null;"
+			replace="&lt;b&gt;\0"
+			flags="s"/>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java"
+			match="didYouMean.toString\(defaultField\);[^}]*}[^}]*}"
+			replace="\0&lt;/b&gt;"
+			flags="s"/>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java"
+			match="didYouMeanParser.parse\(queryString\);"
+			replace="&lt;b&gt;\0&lt;/b&gt;"
+			flags="s"/>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java"
+			match="suggestedQueryString\)"
+			replace="&lt;b&gt;suggestedQueryString\)&lt;/b&gt;"
+			flags="s"/>
+		<loadfile property="src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java"
+			srcFile="target/src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java"/>
+		<replace file="article.html" token="@@@src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java@@@"
+			value="${src/java/org/tiling/didyoumean/DidYouMeanSearchEngine.java}"/>
+
+		<antcall target="escapeAndTab4">
+			<param name="file" value="target/src/java/org/tiling/didyoumean/DidYouMeanParser.java"/>
+		</antcall>
+		<loadfile property="src/java/org/tiling/didyoumean/DidYouMeanParser.java"
+			srcFile="target/src/java/org/tiling/didyoumean/DidYouMeanParser.java"/>
+		<replace file="article.html" token="@@@src/java/org/tiling/didyoumean/DidYouMeanParser.java@@@"
+			value="${src/java/org/tiling/didyoumean/DidYouMeanParser.java}"/>
+		
+		<antcall target="escapeAndTab4">
+			<param name="file" value="target/src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java"/>
+		</antcall>
+		<replaceregexp file="target/src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java"
+			match="String\[\] similarWords = spellChecker.suggestSimilar\(queryString, 1\);"
+			replace="&lt;b&gt;\0&lt;/b&gt;"
+			flags="s"/>
+		<loadfile property="src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java"
+			srcFile="target/src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java"/>
+		<replace file="article.html" token="@@@src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java@@@"
+			value="${src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java}"/>		
+
+		<delete dir="target/src"/>
+	</target>
+
+	<target name="wc">
+		<style in="article_template.html" out="article-wc.txt" style="wc.xsl">
+			<xmlcatalog>
+				<dtd publicId="-//W3C//DTD XHTML 1.0 Strict//EN" location="dtds/xhtml1-strict.dtd" />
+			</xmlcatalog>
+		</style>
+		<exec executable="wc">
+			<arg line="-w article-wc.txt" />
+		</exec>
+		<delete file="article-wc.txt" />
+	</target>
+</project>

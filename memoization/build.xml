@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<project name="memoization" default="test">
+
+  <path id="jars">
+    <pathelement location="../../extensions/junit.jar"/>
+  </path>
+
+  <target name="test">
+    <junit>
+      <classpath>
+        <path refid="jars"/>
+        <pathelement path="build"/>
+      </classpath>
+
+      <formatter type="brief" />
+
+      <batchtest>
+        <fileset dir="src">
+          <include name="**/*Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+</project>

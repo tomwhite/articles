@@ -1,0 +1,3765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:dw="http://www.ibm.com/developerWorks/" elementFormDefault="unqualified" attributeFormDefault="unqualified" version="2.0">
+  <!-- ================================================================ -->
+  <!-- Annotations that define other content for our automatically-     -->
+  <!-- generated tutorial.                                              -->
+  <!-- ================================================================ -->
+  <xsd:annotation id="setup">
+    <xsd:documentation xml:lang="en">
+      <mainTitle>Writing for developerWorks</mainTitle>
+      <referenceSectionTitle>Tag Reference</referenceSectionTitle>
+      <filename>article</filename>
+      <img>images/tutorial.jpg</img>
+      <alt>Writing articles for developerWorks</alt>
+      <feedback-link>feedback-panel</feedback-link>
+      <content-area>XML</content-area>
+      <abstract>Want to write an article for developerWorks?  That's great, but you'll need to learn how to use our XML tags.  This tutorial is the documentation for our article tag set, and includes information about setting up tools, writing style, and other useful tips.</abstract>
+      <exit_url>http://www.ibm.com/developerWorks/xml/</exit_url>
+    </xsd:documentation>
+  </xsd:annotation>
+  <xsd:annotation id="before">
+    <xsd:documentation source="dw-document-before.xml" xml:lang="en"/>
+    <xsd:documentation source="editorial-guidelines.xml" xml:lang="en"/>
+  </xsd:annotation>
+  <xsd:annotation id="after">
+    <xsd:documentation source="submitting-your-article.xml" xml:lang="en"/>
+    <xsd:documentation source="dw-document-after.xml" xml:lang="en"/>
+  </xsd:annotation>
+  <!-- ================================================================ -->
+  <!-- Elements that define document types                              -->
+  <!-- ================================================================ -->
+  <!-- <dw-document> element, the root element for everything           -->
+  <!-- ================================================================ -->
+  <xsd:element name="dw-document">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>The root element of all dW content</title>
+        <desc>Contains a dW document.  The document is either a <xref refid="dw-article-tag">
+            <code>&lt;dw-article&gt;</code>
+          </xref>, a <xref refid="dw-lol-tag">
+            <code>&lt;dw-lol&gt;</code>
+          </xref>, or a <xref refid="dw-sidefile-tag">
+            <code>&lt;dw-sidefile&gt;</code>
+          </xref> element.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice>
+        <xsd:element ref="dw-article"/>
+        <xsd:element ref="dw-lol"/>
+        <xsd:element ref="dw-sidefile"/>
+        <xsd:element ref="dw-subscription-landing"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <dw-article> element                                   -->
+ <!-- ================================================================ -->
+  <xsd:element name="dw-article">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a developerWorks article</title>
+        <desc>Contains a developerWorks article.  This is the root element of most documents on the dW site. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="id" minOccurs="0"/>
+        <xsd:element ref="meta" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="productname" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="productfamily" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="content-area" maxOccurs="unbounded"/>
+        <xsd:element ref="breadcrumbappend" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="seriestitle" minOccurs="0"/>
+        <xsd:element ref="title"/>
+        <xsd:element ref="subtitle" minOccurs="0"/>
+        <xsd:element ref="forumurl" minOccurs="0"/>
+        <xsd:element ref="download-feature" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="pdf" minOccurs="0"/>
+        <xsd:element ref="author" maxOccurs="unbounded"/>
+        <xsd:element ref="date"/>
+        <xsd:element ref="date-updated" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="abstract"/>
+        <xsd:element ref="abstract-extended" minOccurs="0"/>
+        <xsd:element ref="column-info" minOccurs="0"/>
+        <xsd:element ref="docbody"/>
+        <xsd:element ref="attribution" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="relatedlist" minOccurs="0"/>
+        <xsd:element ref="resourcelist" minOccurs="0"/>
+        <!-- 10/20 lk:  can have multiple download features: -->
+      </xsd:sequence>
+      <xsd:attribute name="level" type="level"/>
+      <xsd:attribute name="localsite" type="site"/>
+      <xsd:attribute name="ratings" type="auto" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Whether this article should have a ratings form.  The default value is <code>auto</code>, which means the formatter decides whether the article should have a ratings form or not.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="related_contents" type="auto" use="required"/>
+      <xsd:attribute name="toc" type="auto" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Whether this article should have a table of contents.  The default value is <code>auto</code>, which means the formatter decides if the article has enough headings to make a table of contents useful. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <dw-lol> element                                                 -->
+  <!-- ================================================================ -->
+  <xsd:element name="dw-lol">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define an <code>lol:&gt;</code> article</title>
+        <desc>Contains a developerWorks humor column.  This is the root element of any <code>lol:&gt;</code>documents on the dW site. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="id"/>
+        <xsd:element ref="meta" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="content-area" maxOccurs="unbounded"/>
+        <xsd:element ref="title"/>
+        <xsd:element ref="subtitle" minOccurs="0"/>
+        <xsd:element ref="seriestitle" minOccurs="0"/>
+        <xsd:element ref="author" maxOccurs="unbounded"/>
+        <xsd:element ref="date"/>
+        <xsd:element ref="date-updated" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="abstract"/>
+        <xsd:element ref="docbody"/>
+        <xsd:element ref="attribution" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="relatedlist"/>
+      </xsd:sequence>
+      <xsd:attribute name="localsite" type="site"/>
+      <xsd:attribute name="ratings" type="auto">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Whether this article should have a ratings form.  The default value is <code>auto</code>, which means the formatter decides whether the article should have a ratings form or not.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="related_contents" type="auto"/>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <dw-sidefile> element                                            -->
+  <!-- ================================================================ -->
+  <xsd:element name="dw-sidefile">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a sidefile associated with a dW article</title>
+        <desc>Contains a sidefile for a developerWorks article.  This is typically rendered as a sidefile within an article. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="id"/>
+        <xsd:element ref="meta" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="content-area" maxOccurs="unbounded"/>
+        <xsd:element ref="productname" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="productfamily" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="breadcrumbappend" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="seriestitle" minOccurs="0"/>
+        <xsd:element ref="title"/>
+        <xsd:element ref="subtitle" minOccurs="0"/>
+        <xsd:element ref="date"/>
+        <xsd:element ref="date-updated" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="forumurl" minOccurs="0"/>
+        <xsd:element ref="docbody"/>
+        <xsd:element ref="attribution" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <xsd:attribute name="localsite" type="site"/>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- 10/07 tdc:  New -->
+  <!-- ================================================================ -->
+  <!-- <dw-subscription-landing> element                                   -->
+  <!-- ================================================================ -->
+  <xsd:element name="dw-subscription-landing">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a developerWorks Subscription (formerly Toolbox) landing page</title>
+        <desc>Contains a developerWorks Subscription landing page.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="id" minOccurs="0"/>
+        <xsd:element ref="meta" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="content-area" maxOccurs="unbounded"/>
+        <xsd:element ref="breadcrumbappend" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="seriestitle" minOccurs="0"/>
+        <xsd:element ref="title"/>
+        <xsd:element ref="subtitle" minOccurs="0"/>
+        <xsd:element ref="date" minOccurs="0"/>
+        <xsd:element ref="date-updated" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="abstract"/>
+        <xsd:element ref="bundleavailability" minOccurs="0"/>
+        <xsd:element ref="bundleoverview"/>
+        <xsd:element ref="bundleplatforms" minOccurs="0"/>
+        <xsd:element ref="bundlelanguages" minOccurs="0"/>
+        <xsd:element ref="bundlemoreabout" minOccurs="0"/>
+        <xsd:element ref="bundlerequirements" minOccurs="0"/>
+        <xsd:element ref="bundlecomponents"/>
+        <xsd:element ref="relatedlist" minOccurs="0"/>
+      </xsd:sequence>
+      <xsd:attribute name="subscriptionlevel" type="subscriptionlevel"/>
+      <xsd:attribute name="related_contents" type="yesno" use="required"/>
+      <xsd:attribute name="toc" type="yesno" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Whether this developerWorks Subscription landing page should have a table of contents.  The default value is <code>auto</code>, which means the formatter decides if the page has enough headings to make a table of contents useful. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- Elements for content                                             -->
+  <!-- ================================================================ -->
+  <!-- <a> (anchor) element   -->
+  <!-- ================================================================ -->
+  <xsd:element name="a">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a hypertext anchor</title>
+        <desc>Defines a hypertext link.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="img"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+      <xsd:attribute name="href" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the target URL of this hypertext link. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Gives this location a name.  Named anchors can be referenced just like external URLs.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="onClick" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the action that should take place when the user clicks this link.  This is typically JavaScript code or a call to a JavaScript function. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="origin" type="origin" dw:include="internal">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>!!! Not sure about this one !!!</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="target" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines a target for this link.  You can use this attribute to refer to a named browser window.  A value of <code>_blank</code> means the linked document will appear in a new browser window.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="trackclick" type="yesno" default="no" dw:include="internal">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines whether or not this link should be tracked.  If this attribute has a value of <code>yes</code>, a tracking code will be appended to the link's URL.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+    <!-- Defined as ANY in the DTD -->
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <abstract> element                                               -->
+  <!-- ================================================================ -->
+  <xsd:element name="abstract" type="xsd:string">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>abstract</title>
+        <desc>A short summary of the article, without any formatting tags</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <abstract-extended> element                                               -->
+  <!-- ================================================================ -->
+  <xsd:element name="abstract-extended">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>A long summary of the article</title>
+        <desc>This element contains a long summary of the article, if needed.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <attribution> element                                            -->
+  <!-- ================================================================ -->
+  <xsd:element name="attribution">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define the external source of an article</title>
+        <desc>Defines the source (usually an external magazine or Web site) of this article.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+      <xsd:attribute name="type" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The source of the article.  </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <!-- 12/1/03 TDC:  Removed default='javaworld'.  Should probably use an enumeration here in 2.2+ to trigger different attribution statements in xsl. -->
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <author> element        -->
+  <!-- ================================================================ -->
+  <xsd:element name="author">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define information about the author of the article</title>
+        <desc>This element allows you to define information about the author of this article. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="bio"/>
+        <xsd:element ref="img" minOccurs="0"/>
+        <xsd:element ref="name"/>
+      </xsd:sequence>
+      <xsd:attribute name="company" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The company the author works for.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="email" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The author's email address.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="jobtitle" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The author's job title.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="email_cc" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>email cc address.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <b> (bold) element                                               -->
+  <!-- ================================================================ -->
+  <xsd:element name="b">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define boldfaced text</title>
+        <desc>Defines boldfaced text. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="font"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+        <!-- 4/7/03 Doug added <font> temporarily -->
+      </xsd:choice>
+      <xsd:attribute name="class" type="colorname">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the color scheme used by this element's text.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <bio> element                                                    -->
+  <!-- ================================================================ -->
+  <xsd:element name="bio">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>A short biography of the author</title>
+        <desc>Defines a short biography of the author.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <blockquote> element                                             -->
+  <!-- ================================================================ -->
+  <xsd:element name="blockquote">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a lengthy quote</title>
+        <desc>Defines a long quote.  The text is indented on the left and right margins.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <br> (break) element                                             -->
+  <!-- ================================================================ -->
+  <xsd:element name="br">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a line break</title>
+        <desc>Defines a line break in the text. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:simpleType>
+      <xsd:restriction base="empty"/>
+    </xsd:simpleType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <breadcrumbappend> element                                       -->
+  <!-- ================================================================ -->
+  <xsd:element name="breadcrumbappend">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>An additional link for the breadcrumb trail</title>
+        <desc>Allows you to define an additional link for the breadcrumb trail.  This link is appended to the automatically generated links at the top of the HTML version of the document. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="text" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The text of the link. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="url" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the link.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <!-- ** Question: Should we have text be optional and use the URL if text isn't there? -->
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <bundleavailabilityt> element                                       -->
+  <!-- ================================================================ -->
+  <xsd:element name="bundleavailability">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Types of media on which this bundle is available. </title>
+        <desc>Types of media on which this bundle is available. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="cd" type="yesno" default="no">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines whether or not this  bundle is available on CD-ROM</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="cdonly" type="yesno">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines whether or not this  bundle is available only on CD-ROM</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="customcd" type="yesno">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines whether or not this  bundle is available on a custom CD-ROM.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="web" type="yesno">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines whether or not this bundle is available on the Web.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="webonly" type="yesno">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines whether or not this bundle is available only on the Web.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <bundlecomponents> element                                       -->
+  <!-- ================================================================ -->
+  <xsd:element name="bundlecomponents">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Section containing links to multiple developerWorks Subscription bundle component pages.</title>
+        <desc>Section containing links to multiple developerWorks Subscription bundle component pages.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="heading"/>
+        <xsd:element ref="bundlecomponent" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <!-- 11/11 tdc:  removed totalparts attrib since not needed by tbox (info is already contained in original component title) -->
+      <!-- <xsd:attribute name="totalparts" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The total number of parts (components) that make up the bundle.  The value for totalparts is the "Y" in the phrase, "Part X of Y".</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute> -->
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <bundlecomponent> element                                       -->
+  <!-- ================================================================ -->
+  <xsd:element name="bundlecomponent">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>A link to a developerWorks Subscription bundle component page.</title>
+        <desc>A link to a developerWorks Subscription bundle component page.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="text" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The text of the link. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="url" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the link.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <!-- 11/11 tdc:  removed installorder and part attrib's since not needed by tbox (info is already contained in original component title) -->
+      <!-- <xsd:attribute name="installorder" type="xsd:string" use="optional">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The order within the install process that this component should be installed.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="part" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>This component is one part out of entire number of parts that make up the bundle.  The value for part is the "X" in the phrase, "Part X of Y".</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute> -->
+      <!-- ** Question: Should we have text be optional and use the URL if text isn't there? -->
+    </xsd:complexType>
+  </xsd:element>
+  <!-- 10/07 tdc:  New -->
+  <!-- ================================================================ -->
+  <!-- <bundlemoreabout> element                                            -->
+  <!-- ================================================================ -->
+  <xsd:element name="bundlemoreabout">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a list of links about a product or bundle</title>
+        <desc>Define a list of links about a product or bundle</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- 10/07 tdc:  Added for dw-subscription-landing -->
+  <!-- ================================================================ -->
+  <!-- <bundleoverview> element                                                -->
+  <!-- ================================================================ -->
+  <!-- ** Do we want this to contain text?  I don't think so... -->
+  <xsd:element name="bundleoverview">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Defines the content of the bundle overview section for developerWorks Subscription pages.</title>
+        <desc>Defines the content of the bundle overview section for developerWorks Subscription pages.  This element can contain text, along with the various elements that define the basic layout of text elements.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="blockquote"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="figure"/>
+        <xsd:element ref="heading"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="img"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="pre"/>
+        <xsd:element ref="sidebar"/>
+        <xsd:element ref="table"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+        <!-- I removed <dt> and <dd> -->
+        <!-- I removed <li> -->
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <code> element                                                   -->
+  <!-- ================================================================ -->
+  <xsd:element name="code">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a code listing</title>
+        <desc>Defines a code listing.  The contents of this element are displayed in a monospaced font, with all whitespace preserved from the original XML source.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="font"/>
+        <xsd:element ref="heading"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+      <xsd:attribute name="type" type="inline" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The type of code listing.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="width">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The width in characters of this code listing.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <column-info> element                                            -->
+  <!-- ================================================================ -->
+  <xsd:element name="column-info">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define meta information for this column</title>
+        <desc>Defines meta information for this column, such as an icon or a title.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="col-icon" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines an icon for this column.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="col-name" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines a name for this column.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <!-- ** This is defined as ANY in the DTD, but it looks like it's empty. -->
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <date> element                                                   -->
+  <!-- ================================================================ -->
+  <xsd:element name="date">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>The date this article was created</title>
+        <desc>This element defines the date this article was created.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attributeGroup ref="dmy"/>
+    </xsd:complexType>
+    <!-- ** Should be an XML Schema date type. -->
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <date-updated> element                                           -->
+  <!-- ================================================================ -->
+  <xsd:element name="date-updated">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>The date this article was updated</title>
+        <desc>This element defines the date this article was last updated.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attributeGroup ref="dmy"/>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <dd> (definition) element                                        -->
+  <!-- ================================================================ -->
+  <xsd:element name="dd">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>The definition of a term</title>
+        <desc>This element contains the definition of a term in a definition list.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <dl> (definition list) element                                   -->
+  <!-- ================================================================ -->
+  <xsd:element name="dl">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>A definition list</title>
+        <desc>Defines a definition list.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence maxOccurs="unbounded">
+        <xsd:element ref="dt"/>
+        <xsd:element ref="dd"/>
+      </xsd:sequence>
+      <xsd:attribute name="compact" type="yesno">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines whether or not this definition list should be compacted.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <docbody> element                                                -->
+  <!-- ================================================================ -->
+  <!-- ** Do we want this to contain text?  I don't think so... -->
+  <xsd:element name="docbody">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define the content of a document</title>
+        <desc>Defines the content of a document.  This element can contain text, along with the various elements that define the basic layout of text elements.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="blockquote"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="figure"/>
+        <xsd:element ref="heading"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="img"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="pre"/>
+        <xsd:element ref="sidebar"/>
+        <xsd:element ref="table"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+        <!-- I removed <dt> and <dd> -->
+        <!-- I removed <li> -->
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <dt> element                                                     -->
+  <!-- ================================================================ -->
+  <xsd:element name="dt">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a term</title>
+        <desc>Defines a term in a definition list.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <figure> element                                                 -->
+  <!-- ================================================================ -->
+  <xsd:element name="figure">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a illustrative detail</title>
+        <desc>Define a code sample, a diagram, or some other illustrative detail.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="heading"/>
+        <xsd:element ref="img" maxOccurs="unbounded"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <forumurl> element                                               -->
+  <!-- ================================================================ -->
+  <xsd:element name="forumurl">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Associate a forum with this article</title>
+        <desc>Defines the URL of a forum associated with this article. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="url" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the associated forum.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <heading> element                                                -->
+  <!-- ================================================================ -->
+  <xsd:element name="heading">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a heading</title>
+        <desc>Defines the text of a heading.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+      <xsd:attribute name="alttoc" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines alternate text to be used in the table of contents.  This attribute is useful when the heading has lots of text. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Names this heading.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="refname" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>????Defines an ID for this heading.  You can use this attribute to reference this heading from elsewhere in the document.???? </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="type" type="headingtype" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the type of heading.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="toc" type="yesno" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines whether or not this heading should appear in the table of contents.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <i> (italic) element                                             -->
+  <!-- ================================================================ -->
+  <xsd:element name="i">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define italicized text</title>
+        <desc>Defines text that will appear in an italic font.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <id> element                                                     -->
+  <!-- lk added content-id as string to support wsdd and db2 content ratings data -->
+  <!-- ================================================================ -->
+  <xsd:element name="id">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define an ID for a document</title>
+        <desc>Defines the Domino document ID for this document.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="domino-uid" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the unique Domino document ID for this document.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="content-id" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the unique content id (non-Domino) for this document.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <img> element                                                    -->
+  <!-- ================================================================ -->
+  <xsd:element name="img">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define an image</title>
+        <desc>Defines an image that will appear in the article. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="align" type="alignment">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines how the image should be aligned.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="alt" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines alternate text for the graphic.  This text appears in non-graphical browsers and also may be used by accessibility aids such as screen readers.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="border" type="zeroOrOne">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines whether this image will have a border.  </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="height" type="xsd:integer">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the height in pixels of the image.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="hspace" type="xsd:integer">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the horizontal space around the image.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines a name for the image.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="src" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the location of the image.  This can be a relative URL or an absolute URL.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="valign" type="vertical">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the vertical alignment of the image.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="vspace" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the vertical space around the image.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="width">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the width in pixels of the image.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- 10/07 tdc:  Added for dw-subscription-landing -->
+  <!-- ================================================================ -->
+  <!-- <bundlelanguages> element                                                -->
+  <!-- ================================================================ -->
+  <!-- ** Do we want this to contain text?  I don't think so... -->
+  <xsd:element name="bundlelanguages">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Defines the content of the Languages section for developerWorks Subscription landing pages.</title>
+        <desc>Defines the content of the Languages section for developerWorks Subscription pages.  This element can contain text, along with the various elements that define the basic layout of text elements.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="blockquote"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="figure"/>
+        <xsd:element ref="heading"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="img"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="pre"/>
+        <xsd:element ref="sidebar"/>
+        <xsd:element ref="table"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+        <!-- I removed <dt> and <dd> -->
+        <!-- I removed <li> -->
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <li> element                                                     -->
+  <!-- ================================================================ -->
+  <xsd:element name="li">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define an item in a list</title>
+        <desc>Defines a list item for an ordered or unordered list.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="figure"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="img"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="pre"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="table"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+      <xsd:attribute name="value" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>??? Is this the same as the HTML value attribute?  If so, this changes the item number for this item.  Subsequent list items are numbered accordingly as well. ???</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <meta> (metadata) element                                        -->
+  <!-- ================================================================ -->
+  <xsd:element name="meta">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define metadata about this article</title>
+        <desc>Defines metadata about this article.  (This is used like the HTML <code>&lt;meta&gt;</code> tag.)</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="name" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The name associated with this piece of metadata.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="content" type="xsd:string" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The metadata itself.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <name> element    -->
+  <!-- ================================================================ -->
+  <xsd:element name="name">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Author (s) name</title>
+        <desc>Defines a the name of an individual author.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <ol> (ordered list) element                                      -->
+  <!-- ================================================================ -->
+  <xsd:element name="ol">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define an ordered list</title>
+        <desc>Defines an ordered list.  It contains some number of &lt;li&gt; items.  You can also nest ordered and unordered lists inside the list.</desc>
+        <!--, which can in turn contain other lists, such as ordered lists, unordered lists, or definition lists.  In other words, an unordered list can't be a child of an ordered list; you must put the unordered list (at the second level) inside a list item.</desc> -->
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice maxOccurs="unbounded">
+        <xsd:element ref="li"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="ul"/>
+      </xsd:choice>
+      <xsd:attribute name="start" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the starting number for this list.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="type" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the type of numbering that should be used for this list.  Valid values are:</desc>
+            <ul>
+              <li>
+                <code>1</code> - Items are numbered with Arabic numerals (<code>1</code>, <code>2</code>, <code>3</code>, <code>4</code>, <code>5</code>, and so forth). This is the default numbering style.</li>
+              <li>
+                <code>A</code> - Items are numbered with uppercase alpha characters (<code>A</code>, <code>B</code>, <code>C</code>, <code>...</code>, <code>AA</code>, <code>AB</code>, <code>AC</code>, and so forth)</li>
+              <li>
+                <code>a</code> - Items are numbered with lowercase alpha characters (<code>a</code>, <code>b</code>, <code>c</code>, <code>...</code>, <code>aa</code>, <code>ab</code>, <code>ac</code>, and so forth)</li>
+              <li>
+                <code>I</code> - Items are numbered with uppercase Roman numerals (<code>I</code>, <code>II</code>, <code>III</code>, <code>IV</code>, <code>V</code>, and so forth)</li>
+              <li>
+                <code>i</code> - Items are numbered with lowercase Roman numerals (<code>i</code>, <code>ii</code>, <code>iii</code>, <code>iv</code>, <code>v</code>, and so forth)</li>
+            </ul>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <p> (paragraph) element                                          -->
+  <!-- ================================================================ -->
+  <xsd:element name="p">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a paragraph</title>
+        <desc>Defines a paragraph of text.  </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="font"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="img"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="sidebar"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="table"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+        <!-- <font> is evil, must be killed -->
+      </xsd:choice>
+      <xsd:attribute name="align" type="alignment">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the alignment for this paragraph.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <pdf> element                                                    -->
+  <!-- ================================================================ -->
+  <xsd:element name="pdf">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a link to a PDF file</title>
+        <desc>Defines the link to the PDF version of this document.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="paperSize" type="paperSize">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The paper size used in the PDF file. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="size" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The size in KB of the PDF file.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="url" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the PDF file.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <bundleplatforms> element                                                -->
+  <!-- ================================================================ -->
+  <!-- ** Do we want this to contain text?  I don't think so... -->
+  <xsd:element name="bundleplatforms">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Defines the content of the platforms section for developerWorks Subscription landing pages.</title>
+        <desc>Defines the content of the platforms section for developerWorks Subscription landing pages.  This element can contain text, along with the various elements that define the basic layout of text elements.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="blockquote"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="figure"/>
+        <xsd:element ref="heading"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="img"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="pre"/>
+        <xsd:element ref="sidebar"/>
+        <xsd:element ref="table"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+        <!-- I removed <dt> and <dd> -->
+        <!-- I removed <li> -->
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <pre> element                                                    -->
+  <!-- ================================================================ -->
+  <xsd:element name="pre">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define preformatted content</title>
+        <desc>Defines preformatted content.  All white space characters (spaces, newlines, tabs, and so forth) are preserved.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <productname> element                      -->
+  <!-- ================================================================ -->
+  <xsd:element name="productname">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>The name of the product.</title>
+        <desc>The name of the product.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="b"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <productfamily> element                      -->
+  <!-- ================================================================ -->
+  <xsd:element name="productfamily">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>The name of the product family.</title>
+        <desc>The name of the product family.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="b"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <relatedlist> element                                            -->
+  <!-- ================================================================ -->
+  <xsd:element name="relatedlist">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a list of releated items</title>
+        <desc>Defines a list of related items.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- 10/07 tdc:  Added for dw-subscription-landing -->
+  <!-- ================================================================ -->
+  <!-- <bundlerequirements> element                                                -->
+  <!-- ================================================================ -->
+  <!-- ** Do we want this to contain text?  I don't think so... -->
+  <xsd:element name="bundlerequirements">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Defines the content of the Requirements section for developerWorks Subscription landing pages.</title>
+        <desc>Defines the content of the requirements section for developerWorks Subscription landing pages.  This element can contain text, along with the various elements that define the basic layout of text elements.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="blockquote"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="figure"/>
+        <xsd:element ref="heading"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="img"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="pre"/>
+        <xsd:element ref="sidebar"/>
+        <xsd:element ref="table"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+        <!-- I removed <dt> and <dd> -->
+        <!-- I removed <li> -->
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <resourcelist> element                                           -->
+  <!-- ================================================================ -->
+  <xsd:element name="resourcelist">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a list of resources</title>
+        <desc>Defines a list of resources related to this article.  </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice maxOccurs="unbounded">
+        <xsd:element ref="dl"/>
+        <xsd:element ref="heading"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="ul"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <seriestitle> element                                            -->
+  <!-- ================================================================ -->
+  <xsd:element name="seriestitle">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define the series title for this article</title>
+        <desc>Define the title of the series to which this article belongs.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+    <!-- I added the mixed content model. -->
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <sidebar> element                                                -->
+  <!-- ================================================================ -->
+  <xsd:element name="sidebar">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a sidebar for this article</title>
+        <desc>Allows you to define a sidebar, some tangentially related content or extra detail on some salient point mentioned in the article. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="heading"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+      <xsd:attribute name="width">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The width in pixels that should be used for the sidebar.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="align" type="alignment">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The horizontal alignment of the sidebar. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <sub> (subscript) element                                        -->
+  <!-- ================================================================ -->
+  <xsd:element name="sub" type="xsd:string">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define subscript text</title>
+        <desc>Defines text that should appear in subscript font.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <subtitle> element                                               -->
+  <!-- ================================================================ -->
+  <xsd:element name="subtitle">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a subtitle for the article</title>
+        <desc>Defines a subtitle for this article.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <sup> (superscript) element                                      -->
+  <!-- ================================================================ -->
+  <xsd:element name="sup" type="xsd:string">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define superscript text</title>
+        <desc>Defines text that should appear in superscript font.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <table> element                                                  -->
+  <!-- ================================================================ -->
+  <xsd:element name="table">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a table</title>
+        <desc>Defines a table.  In addition to formatting tabular information, you can use tables to have more control over the layout of information.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="thead" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="tr" maxOccurs="unbounded"/>
+        <xsd:element ref="tfoot" minOccurs="0"/>
+      </xsd:sequence>
+      <xsd:attribute name="border" type="zeroOrOne">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Whether or not this table has a border.  </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="cellpadding" type="xsd:integer">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The space in pixels that is added to all sides of the cells in the table.  A value of <code>cellpadding="3"</code> means none of the cells' contents will be closer than 3 pixels to the edge of the cells.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="cellspacing" type="xsd:integer">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The space in pixels that is added between the cells in the table. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="cols">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The dimensions of the columns in the table.  For example, the markukp <code>cols="75 75 150 50"</code> creates four columns that are 75 pixels, 75 pixels, 150 pixels, and 50 pixels wide, respectively. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="width">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The width of the table.  You can specify this as a number of pixels (<code>width="350px"</code>) or as a percentage of the width of the page (<code>width="75%"</code>).</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <td> element                                                     -->
+  <!-- ================================================================ -->
+  <xsd:element name="td">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a table cell</title>
+        <desc>Defines the contents of a table cell.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="font"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="img"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="p"/>
+        <xsd:element ref="pre"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="table"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+        <!-- <font> is evil, must be killed -->
+        <!-- 4/7/03: Added by Doug, bad style... -->
+      </xsd:choice>
+      <xsd:attribute name="align" type="alignment">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The alignment of this cell.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="bgcolor" type="xslfoColor">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The background color of this table cell.  This can be specified in two ways: as an RGB value (<code>bgcolor="#99CC33"</code>) or as one of the sixteen color values defined in the XSL-FO standard:
+				<table cols="25% 25% 25% 25%">
+                <tr>
+                  <td>aqua</td>
+                  <td>black</td>
+                  <td>blue</td>
+                  <td>fuchsia</td>
+                </tr>
+                <tr>
+                  <td>gray</td>
+                  <td>green</td>
+                  <td>lime</td>
+                  <td>maroon</td>
+                </tr>
+                <tr>
+                  <td>navy</td>
+                  <td>olive</td>
+                  <td>purple</td>
+                  <td>red</td>
+                </tr>
+                <tr>
+                  <td>silver</td>
+                  <td>teal</td>
+                  <td>white</td>
+                  <td>yellow</td>
+                </tr>
+              </table>
+            </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="colspan" type="xsd:positiveInteger">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the number of columns this cell should span. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="rowspan" type="xsd:positiveInteger">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the number of rows this cell should span.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="width">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the width of this cell.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="valign">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the vertical alignment of this cell.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <tfoot> element                                                  -->
+  <!-- ================================================================ -->
+  <xsd:element name="tfoot">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a table footer</title>
+        <desc>Defines a footer row for a table. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice maxOccurs="unbounded">
+        <xsd:element ref="td"/>
+      </xsd:choice>
+      <xsd:attribute name="align" type="alignment">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the horizontal alignment of this cell.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="bgcolor" type="xslfoColor">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The background color of this table cell.  This can be specified in two ways: as an RGB value (<code>bgcolor="#99CC33"</code>) or as one of the sixteen color values defined in the XSL-FO standard:
+				<table cols="25% 25% 25% 25%">
+                <tr>
+                  <td>aqua</td>
+                  <td>black</td>
+                  <td>blue</td>
+                  <td>fuchsia</td>
+                </tr>
+                <tr>
+                  <td>gray</td>
+                  <td>green</td>
+                  <td>lime</td>
+                  <td>maroon</td>
+                </tr>
+                <tr>
+                  <td>navy</td>
+                  <td>olive</td>
+                  <td>purple</td>
+                  <td>red</td>
+                </tr>
+                <tr>
+                  <td>silver</td>
+                  <td>teal</td>
+                  <td>white</td>
+                  <td>yellow</td>
+                </tr>
+              </table>
+            </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="valign" type="vertical">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the vertical alignment of the image.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <thead> element                                                  -->
+  <!-- ================================================================ -->
+  <xsd:element name="thead">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a table header</title>
+        <desc>Defines a header row for a table.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice maxOccurs="unbounded">
+        <xsd:element ref="td"/>
+      </xsd:choice>
+      <xsd:attribute name="align" type="alignment">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the horizontal alignment of this cell.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="bgcolor" type="xslfoColor">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The background color of this table cell.  This can be specified in two ways: as an RGB value (<code>bgcolor="#99CC33"</code>) or as one of the sixteen color values defined in the XSL-FO standard:
+				<table cols="25% 25% 25% 25%">
+                <tr>
+                  <td>aqua</td>
+                  <td>black</td>
+                  <td>blue</td>
+                  <td>fuchsia</td>
+                </tr>
+                <tr>
+                  <td>gray</td>
+                  <td>green</td>
+                  <td>lime</td>
+                  <td>maroon</td>
+                </tr>
+                <tr>
+                  <td>navy</td>
+                  <td>olive</td>
+                  <td>purple</td>
+                  <td>red</td>
+                </tr>
+                <tr>
+                  <td>silver</td>
+                  <td>teal</td>
+                  <td>white</td>
+                  <td>yellow</td>
+                </tr>
+              </table>
+            </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="valign" type="vertical">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the vertical alignment of the image.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <title> element                                                  -->
+  <!-- ================================================================ -->
+  <xsd:element name="title">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a document title</title>
+        <desc>Defines the title of a document.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="i"/>
+        <xsd:group ref="specialCharacters"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <tr> element                                                     -->
+  <!-- ================================================================ -->
+  <xsd:element name="tr">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a table row</title>
+        <desc>Defines a row in a table.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice maxOccurs="unbounded">
+        <xsd:element ref="td"/>
+      </xsd:choice>
+      <xsd:attribute name="align" type="alignment">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the horizontal alignment of this cell.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="bgcolor" type="xslfoColor">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The background color of this table cell.  This can be specified in two ways: as an RGB value (<code>bgcolor="#99CC33"</code>) or as one of the sixteen color values defined in the XSL-FO standard:
+				<table cols="25% 25% 25% 25%">
+                <tr>
+                  <td>aqua</td>
+                  <td>black</td>
+                  <td>blue</td>
+                  <td>fuchsia</td>
+                </tr>
+                <tr>
+                  <td>gray</td>
+                  <td>green</td>
+                  <td>lime</td>
+                  <td>maroon</td>
+                </tr>
+                <tr>
+                  <td>navy</td>
+                  <td>olive</td>
+                  <td>purple</td>
+                  <td>red</td>
+                </tr>
+                <tr>
+                  <td>silver</td>
+                  <td>teal</td>
+                  <td>white</td>
+                  <td>yellow</td>
+                </tr>
+              </table>
+            </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="valign">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Defines the vertical alignment of this cell.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <ul> (unordered list) element                                    -->
+  <!-- ================================================================ -->
+  <xsd:element name="ul">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define an unordered list</title>
+        <desc>Defines an unordered list.  The list contains one or more list items.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:choice maxOccurs="unbounded">
+        <xsd:element ref="li"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="ul"/>
+      </xsd:choice>
+      <xsd:attribute name="type" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The type of this unordered list.  ??? The HTML values are disc, circle, and square.  Are we supporting those here???</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- 10/15 tdc:  Made type attribute required -->
+  <!-- ================================================================ -->
+  <!-- <download-feature> element                                                    -->
+  <!-- ================================================================ -->
+  <xsd:element name="download-feature">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define a link to the download-feature file associated with this article</title>
+        <desc>Defines a link to the download-feature file associated with this article. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="filename" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The filename of the download-feature.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="filetype" type="file-type">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>File type of the download-feature.  Ex: war, jsp, pdf, zip </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="size" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The size of the download-feature file associated with this article.  <code>78KB</code> is an example value. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="downloadtype" type="download-type" use="required">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The type of download-feature.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="url-ftp" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The ftp URL of the download-feature file associated with this article.  Include this, and/or url-http.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="url-http" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The http URL of the download-feature file associated with this article.  Include this, and/or url-ftp.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <!-- 10/20 lk:  Added optional filename attrib for wsdd and db2. -->
+      <!-- 10/20 lk:  Added optional filetype attrib for wsdd and db2. -->
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- <content-area> element                                                   -->
+  <!-- ================================================================ -->
+  <xsd:element name="content-area">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <title>Define the content area for this article</title>
+        <desc>Defines the content are for this article.  </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="name" type="content-area" use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- 4/7/03 Doug added <font> temporarily -->
+  <xsd:element name="font">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Defines the font to be used for this content. </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType mixed="true">
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="a"/>
+        <xsd:element ref="b"/>
+        <xsd:element ref="br"/>
+        <xsd:element ref="code"/>
+        <xsd:element ref="dl"/>
+        <xsd:element ref="font"/>
+        <xsd:element ref="i"/>
+        <xsd:element ref="ol"/>
+        <xsd:element ref="sub"/>
+        <xsd:element ref="sup"/>
+        <xsd:element ref="table"/>
+        <xsd:element ref="ul"/>
+        <xsd:group ref="specialCharacters"/>
+        <!-- <font> is evil, must be killed -->
+      </xsd:choice>
+      <xsd:attribute name="color" type="xslfoColor">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The color for the font.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="face" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The face name used for this font.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="size">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The size of the font. </desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- Elements to define character entities                            -->
+  <!-- ================================================================ -->
+  <!-- 10/27 tdc:  tm is not defined in iso latin 1 -->
+  <!-- 11/07 tdc: Added trade for trademark.  Spy will not transform correctly, but xalan (and probably others) will) -->
+  <xsd:element name="trade" type="xsd:token" fixed="&#8482;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Trademark</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="nbsp" type="xsd:token" fixed="&#160;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Non-breaking space</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="iexcl" type="xsd:token" fixed="&#161;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Inverted exclamation point</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="cent" type="xsd:token" fixed="&#162;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Cent symbol</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="pound" type="xsd:token" fixed="&#163;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Pound symbol</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="curren" type="xsd:token" fixed="&#164;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Generic currency symbol</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="yen" type="xsd:token" fixed="&#165;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Yen sign</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="brvbar" type="xsd:token" fixed="&#166;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Broken vertical bar</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="sect" type="xsd:token" fixed="&#167;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Section mark</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="uml" type="xsd:token" fixed="&#168;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="copy" type="xsd:token" fixed="&#169;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Copyright symbol</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ordf" type="xsd:token" fixed="&#170;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Feminine ordinal</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="laquo" type="xsd:token" fixed="&#171;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Left angle quote</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="not" type="xsd:token" fixed="&#172;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Not sign</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="shy" type="xsd:token" fixed="&#173;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Soft hyphen</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="reg" type="xsd:token" fixed="&#174;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Registered trademark symbol</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="macr" type="xsd:token" fixed="&#175;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Macron (overline character)</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="deg" type="xsd:token" fixed="&#176;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Degree symbol</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="plusmn" type="xsd:token" fixed="&#177;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Plus or minus sign</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="sup2" type="xsd:token" fixed="&#178;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Superscript 2</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="sup3" type="xsd:token" fixed="&#179;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Superscript 3</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="acute" type="xsd:token" fixed="&#180;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="micro" type="xsd:token" fixed="&#181;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Micro symbol (Mu)</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="para" type="xsd:token" fixed="&#182;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Paragraph symbol</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="middot" type="xsd:token" fixed="&#183;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Middle dot</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="cedil" type="xsd:token" fixed="&#184;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Cedilla</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="sup1" type="xsd:token" fixed="&#185;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Superscript 1</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ordm" type="xsd:token" fixed="&#186;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Masculine ordinal</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="raquo" type="xsd:token" fixed="&#187;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Right angle quote</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="frac14" type="xsd:token" fixed="&#188;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Fraction 1/4</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="frac12" type="xsd:token" fixed="&#189;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Fraction 1/2</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="frac34" type="xsd:token" fixed="&#190;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Fraction 3/4</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="iquest" type="xsd:token" fixed="&#191;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Inverted question mark</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Agrave" type="xsd:token" fixed="&#192;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital A with grave accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Aacute" type="xsd:token" fixed="&#193;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital A with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Acirc" type="xsd:token" fixed="&#194;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital A with circumflex</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Atilde" type="xsd:token" fixed="&#195;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital A with tilde</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Auml" type="xsd:token" fixed="&#196;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital A with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Aring" type="xsd:token" fixed="&#197;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital A with ring</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="AElig" type="xsd:token" fixed="&#198;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital AE ligature</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Ccedil" type="xsd:token" fixed="&#199;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital C with cedilla</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Egrave" type="xsd:token" fixed="&#200;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital E with grave accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Eacute" type="xsd:token" fixed="&#201;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital E with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Ecirc" type="xsd:token" fixed="&#202;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital E with circumflex</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Euml" type="xsd:token" fixed="&#203;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital E with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Igrave" type="xsd:token" fixed="&#204;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital I with grave accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Iacute" type="xsd:token" fixed="&#205;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital I with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Icirc" type="xsd:token" fixed="&#206;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital I with circumflex</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Iuml" type="xsd:token" fixed="&#207;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital I with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ETH" type="xsd:token" fixed="&#208;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital Eth</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Ntilde" type="xsd:token" fixed="&#209;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital N with tilde</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Ograve" type="xsd:token" fixed="&#210;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital O with grave accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Oacute" type="xsd:token" fixed="&#211;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital O with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Ocirc" type="xsd:token" fixed="&#212;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital O with circumflex</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Otilde" type="xsd:token" fixed="&#213;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital O with tilde</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Ouml" type="xsd:token" fixed="&#214;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital O with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="times" type="xsd:token" fixed="&#215;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Times (multiplication) symbol</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Oslash" type="xsd:token" fixed="&#216;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital O with slash</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Ugrave" type="xsd:token" fixed="&#217;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital U with grave accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Uacute" type="xsd:token" fixed="&#218;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital U with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Ucirc" type="xsd:token" fixed="&#219;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital U with circumflex</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Uuml" type="xsd:token" fixed="&#220;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital U with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="Yacute" type="xsd:token" fixed="&#221;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital Y with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="THORN" type="xsd:token" fixed="&#222;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Capital thorn</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="szlig" type="xsd:token" fixed="&#223;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>SZ ligature</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="agrave" type="xsd:token" fixed="&#224;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase a with grave accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="aacute" type="xsd:token" fixed="&#225;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase a with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="acirc" type="xsd:token" fixed="&#226;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase a with circumflex</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="atilde" type="xsd:token" fixed="&#227;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase a with tilde</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="auml" type="xsd:token" fixed="&#228;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase a with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="aring" type="xsd:token" fixed="&#229;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase a with ring</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="aelig" type="xsd:token" fixed="&#230;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase ae ligature</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ccedil" type="xsd:token" fixed="&#231;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase c with cedilla</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="egrave" type="xsd:token" fixed="&#232;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase e with grave accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="eacute" type="xsd:token" fixed="&#233;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase e with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ecirc" type="xsd:token" fixed="&#234;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase e with circumflex</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="euml" type="xsd:token" fixed="&#235;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase e with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="igrave" type="xsd:token" fixed="&#236;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase i with grave accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="iacute" type="xsd:token" fixed="&#237;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase i with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="icirc" type="xsd:token" fixed="&#238;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase i with circumflex</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="iuml" type="xsd:token" fixed="&#239;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase i with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="eth" type="xsd:token" fixed="&#240;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase eth</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ntilde" type="xsd:token" fixed="&#241;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase n with tilde</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ograve" type="xsd:token" fixed="&#242;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase o with grave accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="oacute" type="xsd:token" fixed="&#243;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase o with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ocirc" type="xsd:token" fixed="&#244;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase o with circumflex</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="otilde" type="xsd:token" fixed="&#245;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase o with tilde</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ouml" type="xsd:token" fixed="&#246;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase o with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="divide" type="xsd:token" fixed="&#247;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Division symbol</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="oslash" type="xsd:token" fixed="&#248;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase o with slash</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ugrave" type="xsd:token" fixed="&#249;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase u with grave accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="uacute" type="xsd:token" fixed="&#250;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase u with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="ucirc" type="xsd:token" fixed="&#251;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase u with circumflex</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="uuml" type="xsd:token" fixed="&#252;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase u with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="yacute" type="xsd:token" fixed="&#253;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase y with acute accent</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="thorn" type="xsd:token" fixed="&#254;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase thorn</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <xsd:element name="yuml" type="xsd:token" fixed="&#255;">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Lowercase y with umlaut</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  <!-- ================================================================ -->
+  <!-- This group defines all of the special character elements.        -->
+  <!-- ================================================================ -->
+  <xsd:group name="specialCharacters">
+    <xsd:choice>
+      <xsd:element ref="trade"/>
+      <xsd:element ref="nbsp"/>
+      <xsd:element ref="iexcl"/>
+      <xsd:element ref="cent"/>
+      <xsd:element ref="pound"/>
+      <xsd:element ref="curren"/>
+      <xsd:element ref="yen"/>
+      <xsd:element ref="brvbar"/>
+      <xsd:element ref="sect"/>
+      <xsd:element ref="uml"/>
+      <xsd:element ref="copy"/>
+      <xsd:element ref="ordf"/>
+      <xsd:element ref="laquo"/>
+      <xsd:element ref="not"/>
+      <xsd:element ref="shy"/>
+      <xsd:element ref="reg"/>
+      <xsd:element ref="macr"/>
+      <xsd:element ref="deg"/>
+      <xsd:element ref="plusmn"/>
+      <xsd:element ref="sup2"/>
+      <xsd:element ref="sup3"/>
+      <xsd:element ref="acute"/>
+      <xsd:element ref="micro"/>
+      <xsd:element ref="para"/>
+      <xsd:element ref="middot"/>
+      <xsd:element ref="cedil"/>
+      <xsd:element ref="sup1"/>
+      <xsd:element ref="ordm"/>
+      <xsd:element ref="raquo"/>
+      <xsd:element ref="frac14"/>
+      <xsd:element ref="frac12"/>
+      <xsd:element ref="frac34"/>
+      <xsd:element ref="iquest"/>
+      <xsd:element ref="Agrave"/>
+      <xsd:element ref="Aacute"/>
+      <xsd:element ref="Acirc"/>
+      <xsd:element ref="Atilde"/>
+      <xsd:element ref="Auml"/>
+      <xsd:element ref="Aring"/>
+      <xsd:element ref="AElig"/>
+      <xsd:element ref="Ccedil"/>
+      <xsd:element ref="Egrave"/>
+      <xsd:element ref="Eacute"/>
+      <xsd:element ref="Ecirc"/>
+      <xsd:element ref="Euml"/>
+      <xsd:element ref="Igrave"/>
+      <xsd:element ref="Iacute"/>
+      <xsd:element ref="Icirc"/>
+      <xsd:element ref="Iuml"/>
+      <xsd:element ref="ETH"/>
+      <xsd:element ref="Ntilde"/>
+      <xsd:element ref="Ograve"/>
+      <xsd:element ref="Oacute"/>
+      <xsd:element ref="Ocirc"/>
+      <xsd:element ref="Otilde"/>
+      <xsd:element ref="Ouml"/>
+      <xsd:element ref="times"/>
+      <xsd:element ref="Oslash"/>
+      <xsd:element ref="Ugrave"/>
+      <xsd:element ref="Uacute"/>
+      <xsd:element ref="Ucirc"/>
+      <xsd:element ref="Uuml"/>
+      <xsd:element ref="Yacute"/>
+      <xsd:element ref="THORN"/>
+      <xsd:element ref="szlig"/>
+      <xsd:element ref="agrave"/>
+      <xsd:element ref="aacute"/>
+      <xsd:element ref="acirc"/>
+      <xsd:element ref="atilde"/>
+      <xsd:element ref="auml"/>
+      <xsd:element ref="aring"/>
+      <xsd:element ref="aelig"/>
+      <xsd:element ref="ccedil"/>
+      <xsd:element ref="egrave"/>
+      <xsd:element ref="eacute"/>
+      <xsd:element ref="ecirc"/>
+      <xsd:element ref="euml"/>
+      <xsd:element ref="igrave"/>
+      <xsd:element ref="iacute"/>
+      <xsd:element ref="icirc"/>
+      <xsd:element ref="iuml"/>
+      <xsd:element ref="eth"/>
+      <xsd:element ref="ntilde"/>
+      <xsd:element ref="ograve"/>
+      <xsd:element ref="oacute"/>
+      <xsd:element ref="ocirc"/>
+      <xsd:element ref="otilde"/>
+      <xsd:element ref="ouml"/>
+      <xsd:element ref="divide"/>
+      <xsd:element ref="oslash"/>
+      <xsd:element ref="ugrave"/>
+      <xsd:element ref="uacute"/>
+      <xsd:element ref="ucirc"/>
+      <xsd:element ref="uuml"/>
+      <xsd:element ref="yacute"/>
+      <xsd:element ref="thorn"/>
+      <xsd:element ref="yuml"/>
+      <!-- 11/07 tdc:  Added trade -->
+    </xsd:choice>
+  </xsd:group>
+  <!-- ================================================================ -->
+  <!-- Attribute Groups                                                 -->
+  <!-- ================================================================ -->
+  <!-- Day/Month/Year attributes                                        -->
+  <!-- ================================================================ -->
+  <xsd:attributeGroup name="dmy">
+    <xsd:attribute name="day" type="day">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+          <desc>The day of the month the article was created or updated..</desc>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="month" type="month" use="required">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+          <desc>The month of the year the article was created or updated.  Do not use a leading zero.</desc>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="year" type="recentYear" use="required">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+          <desc>The year the article was created or updated. </desc>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:attributeGroup>
+  <!-- ================================================================ -->
+  <!-- Data types                                                       -->
+  <!-- ================================================================ -->
+  <!-- alignment - left, right, or center.                              -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="alignment">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="center">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Centers the item horizontally.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="left">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Left-aligns the item horizontally.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="right">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Right-aligns the item horizontally.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- auto - auto, yes, or no.                                         -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="auto">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="auto">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Determines the value automatically.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="yes">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The value is set to <code>yes</code>.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="no">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The value is set to <code>no</code>.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- colorname - either blue, green, or red.                          -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="colorname">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="blue">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Uses the blue color scheme.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="green">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Uses the green color scheme.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="red">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Uses the red color scheme.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- commonstrings - not sure how this is used.                       -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="commonstrings">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="co">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the components content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="devdomain">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the IBM Developer Domain.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="devtoolbox">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL for the IBM Developer Toolbox.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="esdd">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL for the eServer Developer Domain.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="j">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the Java content area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="lotus">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the Lotus Developer Domain.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="tdd">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the Tivoli Developer Domain.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="vadd">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the VisualAge Developer Domain.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="wsdd">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the WebSphere Developer Domain.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="x">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The URL of the XML content area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- day - the day of the month.                                      -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="day">
+    <xsd:restriction base="xsd:positiveInteger">
+      <xsd:minInclusive value="1"/>
+      <xsd:maxInclusive value="31"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- 3.0 3/5 tdc:  removed doctype (article or a demo)?                          -->
+  <!-- ================================================================ -->
+  
+  <!-- ================================================================ -->
+  <!-- download-type - for code or some other type of download feature.  Only "code" allowed for 2.2.       -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="download-type">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="code"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- empty - used for the empty content model                         -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="empty">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value=""/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- 10/20 lk:  Added for new download-feature element -->
+  <!-- 12/16 lk:  added wsil filetype per request from Jill Amaya -->
+  <!-- ================================================================ -->
+  <!-- file-type -defines the filetype      -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="file-type">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="bat"/>
+      <xsd:enumeration value="ear"/>
+      <xsd:enumeration value="jar"/>
+      <xsd:enumeration value="java"/>
+      <xsd:enumeration value="pdf"/>
+      <xsd:enumeration value="pl"/>
+      <xsd:enumeration value="sh"/>
+      <xsd:enumeration value="war"/>
+      <xsd:enumeration value="wsil"/>
+      <xsd:enumeration value="zip"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- headingtype - what kind of heading is this?                      -->
+  <!-- ================================================================ -->
+  <!-- Can be a major or minor heading, figure heading, code heading, etc. -->
+  <xsd:simpleType name="headingtype">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>The classification of a particular heading.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="code">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>A heading (caption) for a code listing</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="figure">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>A heading (caption) for a figure.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="major">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>A major heading.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="minor">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>A minor heading.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="resourcelist">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The heading for the list of related resources.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="sidebar">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>A heading for a sidebar.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- inline - should an item be inline or a separate section?         -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="inline">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="inline">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>This item should be formatted inline.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="section">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>This item should be formatted as a separate section.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- level - the level of expertise assumed for this article.         -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="level">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>The level of technical expertise assumed for this article.  </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:positiveInteger">
+      <xsd:enumeration value="1">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Limited knowledge, no experience</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="2">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>General knowledge, limited experience</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="3">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Applied knowledge, can perform routine tasks without assistance</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="4">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>In-depth knowledge, can perform all tasks without assitance</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="5">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Extensive knowledge and experience</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- month - the month of the year                      -->
+  <!-- ================================================================ -->
+  <!-- DT 4/4/03 - Changed these to be numeric.                         -->
+  <xsd:simpleType name="month">
+    <xsd:restriction base="xsd:positiveInteger">
+      <xsd:minInclusive value="1"/>
+      <xsd:maxInclusive value="12"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- origin - where did this content come from?  I need to make       -->
+  <!-- sure all of these values are still in use.                       -->
+  <!-- may need to add origin values for product areas - lk  09/03 -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="origin">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="co"/>
+      <xsd:enumeration value="db2cert"/>
+      <xsd:enumeration value="db2i_devdomain"/>
+      <xsd:enumeration value="db2i_dmtheme"/>
+      <xsd:enumeration value="db2i_dwmain"/>
+      <xsd:enumeration value="devdomain"/>
+      <xsd:enumeration value="devdomainhpb"/>
+      <xsd:enumeration value="dmtheme"/>
+      <xsd:enumeration value="dwheader"/>
+      <xsd:enumeration value="dwmain"/>
+      <xsd:enumeration value="hotlinux"/>
+      <xsd:enumeration value="j"/>
+      <xsd:enumeration value="l"/>
+      <xsd:enumeration value="linuxtut"/>
+      <xsd:enumeration value="os"/>
+      <xsd:enumeration value="pdmail"/>
+      <xsd:enumeration value="s"/>
+      <xsd:enumeration value="t"/>
+      <xsd:enumeration value="tstheme"/>
+      <xsd:enumeration value="u"/>
+      <xsd:enumeration value="us"/>
+      <xsd:enumeration value="vaj_dwmain"/>
+      <xsd:enumeration value="vaj_i"/>
+      <xsd:enumeration value="vaj_j"/>
+      <xsd:enumeration value="vaj_p"/>
+      <xsd:enumeration value="vaj_vadd"/>
+      <xsd:enumeration value="wa"/>
+      <xsd:enumeration value="ws"/>
+      <xsd:enumeration value="ws-cd"/>
+      <xsd:enumeration value="wscert"/>
+      <xsd:enumeration value="wstheme"/>
+      <xsd:enumeration value="wstools_dd"/>
+      <xsd:enumeration value="wstools_dwmain"/>
+      <xsd:enumeration value="wstools_ws"/>
+      <xsd:enumeration value="wi"/>
+      <xsd:enumeration value="x"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- paperSize - The size of paper used in a PDF file                 -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="paperSize">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="a4">
+        <xsd:annotation>
+          <xsd:documentation>
+            <desc>A4-sized paper, used in most of the world.  Sheets are 210 by 297 millimeters, roughly 8.26 by 11.69 inches.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="letter">
+        <xsd:annotation>
+          <xsd:documentation>
+            <desc>Letter-sized paper, used primarily in the United States.  Sheets are 8.5 by 11 inches, roughly 216 by 279 millimeters.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- recentYear - the value for year must be reasonable               -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="recentYear">
+    <xsd:restriction base="xsd:positiveInteger">
+      <xsd:minInclusive value="1996"/>
+      <xsd:maxInclusive value="2010"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- updatedYear - the value for date updated must be reasonable      -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="updatedYear">
+    <xsd:restriction base="recentYear">
+      <xsd:minInclusive value="2001"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- site - where is this document from?                              -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="site">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>The site from which this article originated.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="worldwide">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The worldwide developerWorks site.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="china">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The dW China site.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="german">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The dW Germany site.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="india">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The dW India site.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="japan">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The dW Japan site.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="korea">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The dW Korea site.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="taiwan">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The dW Taiwan site.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="uk">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The dW United Kingdom site.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- 10/07 tdc:  Added -->
+  <!-- ================================================================ -->
+  <!-- subscriptionlevel - the possible developerWorks Subscription levels that users may have.         -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="subscriptionlevel">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>The possible developerWorks Subscription levels that users may have.  </desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:positiveInteger">
+      <xsd:enumeration value="1">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Guest</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="2">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Starter</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="3">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Professional</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="4">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Enterprise</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- vertical - vertical alignment values                             -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="vertical">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>The vertical alignment of the content.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="bottom">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Vertically aligns the content along the bottom.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="middle">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Vertically aligns the content in the middle.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="top">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Vertically aligns the content at the top.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- xslfoColor - one of the 16 color names from XSL-FO.              -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="xslfoColor">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>One of the sixteen color names defined in the XSL-FO standard, or a hexadecimal color code, as in <code>#FF00FF</code> or <code>FF00FF</code>.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="aqua"/>
+      <xsd:pattern value="black"/>
+      <xsd:pattern value="blue"/>
+      <xsd:pattern value="gray"/>
+      <xsd:pattern value="fuchsia"/>
+      <xsd:pattern value="gray"/>
+      <xsd:pattern value="green"/>
+      <xsd:pattern value="lime"/>
+      <xsd:pattern value="maroon"/>
+      <xsd:pattern value="navy"/>
+      <xsd:pattern value="olive"/>
+      <xsd:pattern value="purple"/>
+      <xsd:pattern value="red"/>
+      <xsd:pattern value="silver"/>
+      <xsd:pattern value="teal"/>
+      <xsd:pattern value="white"/>
+      <xsd:pattern value="yellow"/>
+      <xsd:pattern value="[#]?[A-Fa-f0-9]{6}"/>
+    </xsd:restriction>
+    <!-- 4/7/03 Doug changed the colors to allow names and hex -->
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- yesno - a simple yes or no.                                      -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="yesno">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="yes"/>
+      <xsd:enumeration value="no"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- ================================================================ -->
+  <!-- zeroOrOne - either 0 or 1.                                       -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="zeroOrOne">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>Whether this item has a border.  A value of <code>0</code> means no border, <code>1</code> means there will be one.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:integer">
+      <xsd:minInclusive value="0"/>
+      <xsd:maxInclusive value="1"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!-- tdc 09/17:  Renamed to content-area -->
+  <!-- ================================================================ -->
+  <!-- content-area - the dW content area for this document.                            -->
+  <!-- ================================================================ -->
+  <xsd:simpleType name="content-area">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        <desc>The developerWorks content-area to which this article belongs.</desc>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="autonomic">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The Autonomic computing content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="components">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The components content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="db2">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The DB2 product area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="eserver">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The eServer product area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="grid">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The Grid computing content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="ibm">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The IBM content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="java">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The Java content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="linux">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The Linux content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="lotus">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The Lotus product area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="none">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>Doesn't belong to any content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="opensource">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The open source content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="rational">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The Rational product area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="security">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The security content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="tivoli">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The Tivoli product area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="subscription">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The developerWorks Subscription area (formerly "Toolbox").</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="unicode">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The Unicode content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="usability">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The usability content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="web">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The Web architecture content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="webservices">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The Web services content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="websphere">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The WebSphere product area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="wireless">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The wireless content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="xml">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            <desc>The XML content-area.</desc>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+</xsd:schema>

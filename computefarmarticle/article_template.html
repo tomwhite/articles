@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+  <head>
+    <title>How To Build a Compute Farm</title>
+  </head>
+
+  <body>
+
+    <h2>How To Build a Compute Farm</h2>
+    <p>
+    by Tom White
+    </p>
+
+<p>
+Some programs can be made to run faster by dividing them up into smaller pieces and running these pieces on multiple processors. This is known as <i>parallel computing</i>, and a large number of hardware and software systems exist to facilitate it. The most famous example of a (distributed) parallel program is <a href="http://setiathome.ssl.berkeley.edu/">SETI@home</a>, but there are many other applications including ray tracing, database searching, code breaking, neural network training, genetic algorithms, and a whole host of <a href="http://en.wikipedia.org/wiki/NP-complete">NP-complete</a> problems where a brute force approach is needed.
+</p>
+
+<p>
+<a href="http://computefarm.jini.org/"><i>ComputeFarm</i></a> is an open source Java framework for developing and running parallel programs. Under the covers ComputeFarm runs on Jini, which brings code-mobility and fault tolerance to network applications. From version 2.1 onwards Jini is being <a href="http://archives.java.sun.com/cgi-bin/wa?A2=ind0503&amp;L=jini-users&amp;O=D&amp;P=36217">released under the Apache Licence, version 2.0</a>, so this is an exciting time for Jini. This article introduces ComputeFarm and illustrates how to run parallel programs with it.
+</p>
+
+
+
+<h3>The Replicated-Worker Pattern</h3>
+
+<p>
+ComputeFarm grew out of a JavaSpaces (itself a part of Jini) implementation of the <i>replicated-worker pattern</i> from the definitive book on JavaSpaces, <i><a href="http://java.sun.com/developer/Books/JavaSpaces/introduction.html">JavaSpaces Principles, Patterns, and Practice</a></i> by Eric Freeman, Susanne Hupfer, and Ken Arnold. In this pattern, also know as the <i>master-worker pattern</i>, a master process creates a collection of tasks that need running. Workers take tasks from the collection and run them, then hand the computed result to the master. A space is a natural conduit for passing messages between master and workers, due to the decoupled programming style it encourages.
+</p>
+
+<p>
+In ComputeFarm, a <code>ComputeSpace</code> holds <code>Task</code> objects and result objects of type <code>Object</code>. Each worker's lifecycle is as follows:
+</p>
+
+<ol>
+  <li>Wait for an available <code>Task</code> from the <code>ComputeSpace</code>.</li>
+  <li>Execute the <code>Task</code>.</li>
+  <li>Put the <code>Task</code> result back into the <code>ComputeSpace</code>.</li>
+  <li>Go to step 1.</li>
+</ol>
+
+<p>
+There are typically many workers - and they are identical: hence the term <i>replicated</i>. This pattern neatly provides load-balancing, whereby each worker contributes whatever resources it can afford. The worker on a faster machine will execute more <code>Task</code>s than the worker on a slower or otherwise heavily-loaded machine; and as long as the granularity of the <code>Task</code>s is sufficiently fine no one worker will hold up the computation.
+</p>
+
+<p>
+A client of ComputeFarm (the master process) will not usually think in terms of the workers doing their work, but in terms of the overall problem they have to solve, called a <code>Job</code>. From the client's point of view, this is what happens:
+</p>
+
+<ul>
+  <li>The client creates a <code>Job</code> and specifies how to divide it into <code>Task</code>s.</li>
+  <li>Each <code>Task</code> is written into a <code>ComputeSpace</code> by the <code>Job</code>.</li>
+  <li>Each <code>Task</code> in the <code>ComputeSpace</code> is turned into a result by one of the replicated workers.</li>
+  <li>Results of executed <code>Task</code>s are read from the <code>ComputeSpace</code> by the <code>Job</code> and combined into an overall result for the client.</li>
+</ul>
+
+<p>
+Notice that these processes typically run concurrently. So, for example, the client may be still dividing the <code>Job</code> into <code>Task</code>s as the computed results of earlier <code>Task</code>s come back to be processed. For the client the <code>ComputeSpace</code> is simply a raw computing resource where tasks are automatically executed as soon as they are dropped into the space. In fact, the client doesn't know about the workers, and they do not appear in the core API. The flow is shown schematically in Figure 1.
+</p>
+
+<p>
+<img src="images/rep-worker.png" width="600" height="367"/>
+</p>
+
+<p>
+That's enough theory, let's write a program to run on ComputeFarm.
+</p>
+
+<h3>A Simple Example</h3>
+
+<p>
+To see how ComputeFarm can be useful, consider the following very simple example. If we wanted to calculate the sum of the first <i>n</i> squares, that is,
+</p>
+
+<p>
+1<sup>2</sup> + 2<sup>2</sup> + 3<sup>2</sup> + ... + <i>n</i><sup>2</sup>
+</p>
+
+<p>
+then we might write the following piece of code
+(ignoring the fact that there is a simple formula for this sum, <i>n</i>(<i>n</i> + 1)(2<i>n</i> + 1)/6):
+</p>
+
+<pre>
+int sum = 0;
+for (int i = 1; i &lt;= n; i++) {
+    sum += i * i;
+}
+</pre>
+
+<p>
+Now imagine for the sake of example that multiplication is a significantly more expensive operation than addition. If we had multiple processors to run the program on, it would be worthwhile to arrange for the squaring operations to be shared out amongst the processors to reduce the time to calculate the sum. In other words, we break the problem into smaller sub-problems (squaring), and then re-combine the sub-results  to produce the final result (addition).
+</p>
+
+<p>
+To run a <code>Job</code>, a ComputeFarm client gets a <code>JobRunner</code> from a <code>JobRunnerFactory</code>. There are different implementations of <code>JobRunner</code> which have different strategies for parallelizing <code>Task</code> execution. For unit testing the <code>JobRunner</code> created by a <code>SimpleJobRunnerFactory</code> is handy as it executes all tasks in the same JVM. We shall see later how to run a computation on multiple machines using the JavaSpaces implementation of <code>JobRunner</code>.
+</p>
+
+<p>
+First of all, let's see how we can implement a program to calculate the sum of squares, starting with the unit test:
+</p>
+
+<pre>
+@src/test/org/tiling/computefarm/samples/squares/SquaresJobTest.java@
+</pre>
+
+<p>
+We create a new <code>SquaresJob</code> to calculate the sum for <i>n</i> = 10, then obtain a <code>JobRunner</code> for it from the <code>SimpleJobRunnerFactory</code>. Calling the <code>run()</code> method on the runner blocks until the job completes, at which point we can retrieve the overall result from the runner and check it has the correct value.
+</p>
+
+<p>
+The <code>Job</code> interface specifies two abstract methods:
+</p>
+
+<ul>
+  <li><code>void generateTasks(ComputeSpace space)</code> where the implementor specifies how the problem is broken up into <code>Task</code>s, and</li>
+  <li><code>void collectResults(ComputeSpace space)</code> where the implementor recombines the results from each <code>Task</code> into the final result.</li>
+</ul>
+
+<p>
+Let's see the implementation of <code>SquaresJob</code>:
+</p>
+
+<pre>
+@src/java/org/tiling/computefarm/samples/squares/SquaresJob.java@
+</pre>
+
+<p>
+In the <code>generateTasks()</code> method we create a <code>SquaresTask</code> for each term in the sum and write them into the supplied <code>ComputeSpace</code>. Conversely, in the <code>collectResults()</code> method we take task results as they appear from the space and sum them. Both method implementations deal with various exceptions that may arise when interacting with the
+<code>ComputeSpace</code>; we shall look at them in more detail later, but for the moment just note that we exit if anything "bad" happens.
+</p>
+
+<p>
+Finally, the listing for <code>SquaresTask</code> is very straightforward. It implements the single <code>execute()</code> method of the <code>Task</code> interface, which is an example of the <a href="http://c2.com/cgi/wiki?CommandPattern">Command Pattern</a>. For this example, the implementation squares an integer. <code>SquaresTask</code> has also been marked <code>Serializable</code> to allow it to be marshalled using RMI, as task instances will be when we use the JavaSpaces runner to share tasks between machines. Similarly, the return type of the <code>execute()</code> method - <code>java.lang.Integer</code> here - must be <code>Serializable</code>.
+</p>
+
+<pre>
+@src/java/org/tiling/computefarm/samples/squares/SquaresTask.java@
+</pre>
+
+<p>
+The test now runs and passes. The next step is to see how to run the program on a network of machines.
+</p>
+
+<h3>Code Mobility</h3>
+
+<p>
+The key difference between running ComputeFarm in a single JVM (using <code>SimpleJobRunnerFactory</code>), and multiple JVMs (using <code>JavaSpacesJobRunnerFactory</code>) is that in the multiple JVM case there must be some way for the task implementations to be downloaded to each JVM. The way ComputeFarm workers are able to be generic is by <i>dynamic code downloading</i>, which in Java is most commonly achieved by using the <a href="http://java.sun.com/j2se/1.4.2/docs/guide/rmi/codebase.html">mechanisms provided by Java RMI</a>. In a nutshell, this means that Java classes are made available to remote JVMs by providing a <i>codebase</i> - a URL where the classes can be downloaded from. The standard way of doing this is to package up the classfiles that are needed by the remote JVM into a jar that is conventionally named something like <code>myclasses-dl.jar</code>, where the <code>dl</code> indicates the jar is for downloading. Then the jar is made downloadable by running a web server to serve it up.
+</p>
+
+<p>
+While all of this is well understood and not inherently difficult, it is an area where there is considerable scope for configuration error (witness the number of hits for a search on <a href="http://www.google.com/search?hl=en&amp;q=codebase+jini+problem&amp;btnG=Google+Search">"jini codebase problem"</a>). Of course you can use any HTTP server, but to ease development and deployment, ComputeFarm provides a lightweight embeddable server called <code>ClassServer</code> that allows you to run the server in the same JVM as the ComputeFarm client. This avoids some of the complexity of running a separate HTTP daemon, since, for example, the embedded server takes care of choosing a free port number and setting the <code>java.rmi.server.codebase</code> property. You still have to create a download jar, specifying the classes to include in the jar manually, perhaps using the Ant Jar Task. Or you can use a tool that does dependency analysis, such as <a href="http://java.sun.com/products/jini/2.0/doc/api/com/sun/jini/tool/ClassDep.html">ClassDep</a>, which is a part of the Jini 2.0 package, or <a href="http://www.cheiron.org/utils/nightly/api/org/cheiron/tools/ant/DownloadJar.html">DownloadJar Ant Task</a> from the Cheiron project.
+</p>
+
+<p>
+If you want to avoid having to create a download jar, consider using <code>ClasspathServer</code>, which, as the name suggests, serves classes direct from the classpath. It is very simple to deploy - but should be avoided in production environments  since it imposes an overhead of one HTTP transfer per class which can be prohibitive for systems which have lots of classes or workers. Furthermore, <code>ClassServer</code> has no security controls governing which classes are downloaded.
+</p>
+
+<h3>Running the Example Program</h3>
+
+<p>
+The ComputeFarm client is really just an extension of the <code>SquaresJobTest</code> above. Instead of using a <code>SimpleJobRunnerFactory</code>, we call <code>JobRunnerFactory.newInstance()</code> which creates a <code>JavaSpacesJobRunnerFactory</code> by default. (The system property <code>org.tiling.computefarm.JobRunnerFactory</code> can be used to control the implementation class that is loaded by a call to <code>JobRunnerFactory.newInstance()</code>.)
+</p>
+
+<p>
+Also, a <code>ClasspathServer</code> is started to allow the remote client to download the classfiles for <code>SquaresTask</code>.
+</p>
+
+<pre>
+@src/java/org/tiling/computefarm/samples/squares/SquaresClient.java@
+</pre>
+
+<p>
+Before we run <code>SquaresClient</code>, how do we set up our network of workers? I find it convenient to have my development box running both JavaSpaces and the client process (although it is fine to run these two instances on separate machines), and to run a worker on every other available processor on the LAN.
+</p>
+
+<p>
+Each machine needs a Java 1.4 runtime, so start by <a href="http://java.sun.com/j2se/1.4.2/download.html">downloading</a> and installing it on every box.
+</p>
+
+<p>
+Next set up JavaSpaces. I prefer running ComputeFarm on <a href="http://www.dancres.org/blitz/">Blitz JavaSpaces</a>, since it is open source (BSD license) and very easy to get up and running. However, ComputeFarm can run on any JavaSpaces implementation - I have successfully used <a href="http://java.sun.com/products/jini/2.0/doc/api/com/sun/jini/outrigger/package-summary.html">Outrigger</a> (the JavaSpaces implementation that comes with Jini) and <a href="http://www.gigaspaces.com/downloads.html">GigaSpaces</a>. To run Blitz JavaSpaces:
+</p>
+
+<ol>
+  <li>Download <a href="http://starterkit.jini.org/downloads/index.html">Jini 2.0</a> (the latest stable release at the time of writing). Install by unzipping the archive to a suitable location.</li>
+  <li>Download the Blitz JavaSpaces (Pure Java Edition) <a href="http://sourceforge.net/project/showfiles.php?group_id=126322&amp;package_id=138181">installer jar</a>, and run it by typing <code>java -jar installer_pj_n_nn.jar</code>, where <code>n_nn</code> is the version number. On Windows you can simply double click the jar to launch it.</li>
+  <li>Start Blitz JavaSpaces by typing <code>blitz</code> (Windows), or <code>blitz.sh</code> (unix) in the directory you installed it in.</li>
+</ol>
+
+<p>
+Next install the workers. For each worker:
+</p>
+
+<ol>
+  <li>Get the latest <a href="http://computefarm.jini.org/public/releases/computefarm-0.8.2.zip">ComputeFarm framework distribution</a> and unzip it.</li>
+  <li>In the directory you unzipped it in, type <code>run</code>.</li>
+</ol>
+
+<p>
+(Alternatively you can run workers as <a href="http://computefarm.jini.org/screensaver.html">screensavers</a>.) Finally, run the client, not forgetting to specify a policy file that grants enough permissions for Jini to work. The following ant task shows one way of doing this. (The <a href="http://computefarm.jini.org/public/releases/computefarm-samples-0.8.2-src.zip">ComputeFarm samples distribution</a>, which includes the squares example, has a full ant file.)
+</p>
+
+<pre>
+@squares.xml@
+</pre>
+
+<p>
+This is what you should see from the client:
+</p>
+
+<pre>
+Buildfile: build.xml
+
+squares:
+     [java] n = 10
+     [java] Sum of squares = 385
+     [java] n * (n + 1) * (2 * n + 1) / 6 = 385
+</pre>
+
+<p>
+Let's look now at how things might go wrong when running a parallel program.
+</p>
+
+<h3>Fault Tolerance</h3>
+
+<p>
+When you move from a single process running your program to multiple distributed processes, there is a change in kind in the types of failure that programs can exhibit. Peter Deutsch famously listed the assumptions that do not carry over to distributed computing in <a href="http://today.java.net/jag/Fallacies.html">The Eight Fallacies of
+Distributed Computing</a>. The development of Jini can be understood as a distributed computing model that takes these fallacies <a href="http://research.sun.com/techrep/1994/abstract-29.html">seriously</a> - it doesn't try to "solve" them, it provides mechanisms for the programmer to deal with them. For example, since the network is not reliable, all remote method invocations throw <code>java.rmi.RemoteException</code> for the programmer to handle in the way most appropriate to the application at that point.
+</p>
+
+<p>
+Jini's design promotes a certain flexibility and robustness in many of its applications. In ComputeFarm, the order in which services are started is not important. You can start the client first, then the workers, then the JavaSpace, and the system would still work. Or, if a worker crashes the computation would still continue (assuming there are other workers still running), since each task is executed under a <a href="http://java.sun.com/products/jini/2.0/doc/specs/html/txn-spec.html">transaction</a>, which would be rolled back after the worker crashed, leaving the task in the space for another worker to pick up. JavaSpace systems even clean up after themselves. Any tasks or results left in the space from a cancelled job will be removed when their <a href="http://java.sun.com/products/jini/2.0/doc/specs/html/lease-spec.html">leases</a> expire. Note that both the transaction timeout and the lease time in ComputeFarm may be configured via system properties, see the <a href="http://computefarm.jini.org/nonav/public/docs/apidocs/index.html">javadoc</a> for details.
+</p>
+
+<p>
+To make your program robust, you also need to consider how to handle the three possible types of exception that can arise when dealing with the remote <code>ComputeSpace</code>. Let's look at them in turn.
+</p>
+
+<h4>ComputeSpaceException</h4>
+
+<p>
+<code>ComputeSpaceException</code> is an unchecked exception which is thrown when there is an unrecoverable error when writing or taking from the space. This case is typically not caused by a networking problem, but by a resource limitation (such as running out of disk space) or encountering an internally inconsistent state (such as not being able to unmarshall a result object). Since it is unchecked (and unrecoverable) you do not normally need to handle this exception.
+</p>
+
+<h4>CannotWriteTaskException and CannotTakeResultException</h4>
+
+<p>
+<code>CannotWriteTaskException</code> and <code>CannotTakeResultException</code> are the same type of checked exception, the only difference is that the first may be thrown during write operations, and the second during take operations. These exceptions are thrown if there is a transient problem while communicating with the space. They guarantee that the state of the space will not have been changed by the method call, so a <code>write()</code> call does not write the task to the space, and a <code>take()</code> call does not remove a result from the space.
+</p>
+
+<p>
+Users of the space can catch these exceptions to implement a retry strategy - for example, retrying a limited number of times after a suitable interval - safe in the knowledge that the space has not been left in an indeterminate state. This is not quite the full story, since, due to the concurrent execution of the <code>generateTasks()</code> and <code>collectResults()</code> methods, it is possible that the client could block indefinitely on the call to <code>take()</code>, if a call to <code>write()</code> has failed with a <code>CannotWriteTaskException</code> and the client has stopped trying to do any further writes.
+</p>
+
+<p>
+The way to unblock the execution is to invoke the <code>cancel()</code> method on the <code>JobRunner</code> which started the <code>Job</code>. This can be done by the code in the <code>Job</code> implementation that implements the retry strategy, when it has decided to give up. Alternatively, the client that creates and runs the <code>JobRunner</code> can call <code>cancel()</code> when it decides that the job has not completed in a sufficiently timely manner - perhaps under user intervention, or a pre-defined timeout. The following code illustrates the latter strategy for a job called <code>NonTerminatingJob</code>, which blocks in the way described above.
+</p>
+
+<pre>
+@src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingClient.java@
+</pre>
+
+<p>
+The client creates a new thread to run the <code>JobRunner</code> for <code>NonTerminatingJob</code>, then it terminates the job after waiting for 5 seconds by calling <code>cancel()</code> on the <code>JobRunner</code>.
+</p>
+
+<h4>CancelledException</h4>
+
+<p>
+<code>CancelledException</code> is a checked exception that is only thrown when <code>cancel()</code> has been called on the associated <code>JobRunner</code>. The way to handle the exception is obviously to stop doing any more work and clean up. Here is the code for <code>NonTerminatingJob</code>, and the output showing the sequence of calls:
+</p>
+
+<pre>
+@src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingJob.java@
+</pre>
+
+<pre>
+Buildfile: build.xml
+
+nonterminating:
+     [java] Waiting 5 seconds before cancelling job...
+     [java] Collecting results...
+     [java] Cancelling job...
+     [java] Waiting for job runner to finish...
+     [java] Job cancelled.
+     [java] Job runner finished.
+</pre>
+
+<h3>Conclusion</h3>
+
+<p>
+For the example we looked at in this article it was not really worth the effort to re-cast it as a parallel program since there are no real performance benefits.
+
+However, there is a class of problems which are both computationally expensive and can be split into independent chunks, where re-writing as parallel programs is highly beneficial. (For example, <a href="http://computefarm.jini.org/public/releases/computefarm-samples-0.8.2-src.zip">the ComputeFarm samples distribution</a> includes a distributed extension of JUnit. And the training component of <a href="http://www.jooneworld.com/">Joone</a>, the leading open-source Java Neural Network framework, runs on ComputeFarm.)
+
+If you have an application that fits this description, then consider using ComputeFarm to distribute the processing effort across a network of machines.
+</p>
+
+<h3>Resources</h3>
+
+<ul>
+  <li>The <a href="http://computefarm.jini.org">ComputeFarm</a> site for documentation and downloads.</li>
+  <li><i><a href="http://bluehawk.monmouth.edu/~rclayton/web-pages/u03-598/wpp.pdf">How to Write Parallel Programs: A Guide to the Perplexed</a></i> (ACM Computing Surveys, Vol. 21, No. 3, September 1989) by Nicholas Carriero and David Gelernter, is an excellent paper describing various approaches to solving problems using parallel programs.</li>
+  <li>Eric Freeman, Susanne Hupfer, and Ken Arnold, <b><a href="http://java.sun.com/developer/Books/JavaSpaces/introduction.html">JavaSpaces Principles, Patterns, and Practice</a></b>. Pearson Education, 1st edition (June 15, 1999). Despite its age, this book still is the best way to see the exciting possibilities to be had with JavaSpaces.</li>
+  <li>Phillip Bishop, and Nigel Warren, <b><a href="http://www.djip.co.uk/jsipinfo/">JavaSpaces in Practice</a></b>, Pearson Education, 1st edition (September 20, 2002). Lots of good advice on getting the best out of JavaSpaces.</li>
+  <li>Visit the <a href="http://www.jini.org/">Jini Community</a> to find the latest Jini and JavaSpaces news. The <a href="http://www.jini.org/maillists.html">mailing lists</a> are worth keeping an eye on.</li>
+</ul>
+
+
+
+<!--
+    <h3>Notes</h3>
+    <p>
+    ComputeFarm's core API is very small - four interfaces and one class - and actually independent of the JavaSpaces API.
+    </p>
+<h4>The Multiprocessor Scheduling Problem</h4>
+
+<p>
+Aka "multiway partitioning". Nice example since it is simple to program, and it is very apt (used to distribute load in a parallel computer).
+ * A definition: http://ej.iop.org/EJ/article/1742-5468/2004/04/P04003/jstat4_04_p04003.html#jstat178491s6
+</p>
+-->
+
+  </body>
+</html>

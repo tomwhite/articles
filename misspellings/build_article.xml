@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<project name="article" default="article">
+
+  <!-- Helper tasks -->
+
+  <target name="tag">
+    <replaceregexp file="${file}" match="@&lt;(.*?)&gt;@" replace="&lt;\1&gt;" flags="g"/>
+    <replaceregexp file="${file}" match="@&lt;/(.*?)&gt;@" replace="&lt;/\1&gt;" flags="g"/>
+  </target>
+
+  <target name="tab4">
+    <replaceregexp file="${file}" match="\t" replace="    " flags="g"/>
+  </target>
+
+  <target name="tab2">
+    <replaceregexp file="${file}" match="\t" replace="  " flags="g"/>
+  </target>
+
+  <target name="bold">
+    <replaceregexp file="${file}" match="@open_bold@" replace="&lt;b&gt;" flags="g"/>
+    <replaceregexp file="${file}" match="@close_bold@" replace="&lt;/b&gt;" flags="g"/>
+  </target>
+
+  <target name="snip">
+    <replaceregexp file="${file}" match="@snip_start@.*?@snip_end@" replace="" flags="gs"/>
+  </target>
+
+  <target name="ellipsis">
+    <replaceregexp file="${file}" match="@ellipsis_start@.*?@ellipsis_end@" replace="&lt;b&gt;...&lt;/b&gt;" flags="gs"/>
+  </target>
+
+  <target name="escape">
+    <replaceregexp file="${file}" match="&amp;" replace="&amp;amp;" flags="g"/>
+    <replaceregexp file="${file}" match="&lt;" replace="&amp;lt;" flags="g"/>
+    <replaceregexp file="${file}" match="&gt;" replace="&amp;gt;" flags="g"/>
+    <replaceregexp file="${file}" match="&quot;" replace="&amp;quot;" flags="g"/>
+    <replaceregexp file="${file}" match="&apos;" replace="&amp;apos;" flags="g"/>
+  </target>
+  
+  <target name="java">
+    <antcall target="tab2">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="escape">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="snip">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="ellipsis">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="bold">
+      <param name="file" value="build/${file}"/>
+    </antcall>       
+    <loadfile property="${file}"
+      srcFile="build/${file}"/>  
+  </target> 
+  
+  <target name="xml">
+    <antcall target="tab2">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="escape">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="snip">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="ellipsis">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="bold">
+      <param name="file" value="build/${file}"/>
+    </antcall>    
+    <loadfile property="${file}"
+      srcFile="build/${file}"/>  
+  </target>
+
+  <!-- Main targets -->
+
+  <target name="article">
+    <mkdir dir="build"/>
+    <copy todir="build">
+      <fileset dir="annotated_src"/>
+      <!--fileset dir=".">
+        <include name="src/"/>
+      </fileset-->
+    </copy>
+
+    <antcall target="java">
+      <param name="file" value="src/org/tiling/misspelling/phonetic/KnuthSoundex.java"/>
+    </antcall>
+    <loadfile property="src/org/tiling/misspelling/phonetic/KnuthSoundex.java"
+      srcFile="build/src/org/tiling/misspelling/phonetic/KnuthSoundex.java"/>
+
+    <antcall target="java">
+      <param name="file" value="src/org/tiling/misspelling/test/ApacheMetaphoneTest.java"/>
+    </antcall>
+    <loadfile property="src/org/tiling/misspelling/test/ApacheMetaphoneTest.java"
+      srcFile="build/src/org/tiling/misspelling/test/ApacheMetaphoneTest.java"/>
+
+    <antcall target="java">
+      <param name="file" value="src/org/tiling/misspelling/test/ApacheDoubleMetaphoneTest.java"/>
+    </antcall>
+    <loadfile property="src/org/tiling/misspelling/test/ApacheDoubleMetaphoneTest.java"
+      srcFile="build/src/org/tiling/misspelling/test/ApacheDoubleMetaphoneTest.java"/>
+
+    <antcall target="java">
+      <param name="file" value="src/org/tiling/misspelling/metric/LevenshteinDistanceMetric.java"/>
+    </antcall>
+    <loadfile property="src/org/tiling/misspelling/metric/LevenshteinDistanceMetric.java"
+      srcFile="build/src/org/tiling/misspelling/metric/LevenshteinDistanceMetric.java"/>
+
+    <antcall target="java">
+      <param name="file" value="src/org/tiling/misspelling/app/Suggest.java"/>
+    </antcall>
+    <loadfile property="src/org/tiling/misspelling/app/Suggest.java"
+      srcFile="build/src/org/tiling/misspelling/app/Suggest.java"/>
+
+    <delete file="developerworks/my-article/misspellings.xml"/>
+    <copy file="developerworks/my-article/misspellings_template.xml" tofile="developerworks/my-article/misspellings.xml">
+      <filterset>
+        <filter token="src/org/tiling/misspelling/phonetic/KnuthSoundex.java"
+          value="${src/org/tiling/misspelling/phonetic/KnuthSoundex.java}"/>
+        <filter token="src/org/tiling/misspelling/test/ApacheMetaphoneTest.java"
+          value="${src/org/tiling/misspelling/test/ApacheMetaphoneTest.java}"/>
+        <filter token="src/org/tiling/misspelling/test/ApacheDoubleMetaphoneTest.java"
+          value="${src/org/tiling/misspelling/test/ApacheDoubleMetaphoneTest.java}"/>
+        <filter token="src/org/tiling/misspelling/metric/LevenshteinDistanceMetric.java"
+          value="${src/org/tiling/misspelling/metric/LevenshteinDistanceMetric.java}"/>
+        <filter token="src/org/tiling/misspelling/app/Suggest.java"
+          value="${src/org/tiling/misspelling/app/Suggest.java}"/>
+      </filterset>
+    </copy>
+    <style in="developerworks/my-article/misspellings.xml" out="developerworks/my-article/misspellings.html" style="developerworks/xsl/dw-document-html-3.0.xsl"/>
+    
+    <delete dir="build"/>
+  </target>
+
+</project>

@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+  <head>
+    <title>Did You Mean: Lucene?</title>
+  </head>
+
+  <body>
+
+    <h2>Did You Mean: Lucene?</h2>
+    <p>
+    by Tom White
+    </p>
+
+  <p>
+  All modern search engines attempt to detect and correct spelling
+  errors in users' search queries.  Google, for example, was one of
+  the first to offer such a facility, and today we barely notice when
+  we are asked <i>Did you mean <span
+  style="text-decoration:underline">x</span></i> after a slip on the
+  keyboard.  This article shows you <!-- co: replaced "how to add"
+  with "one way of adding" dhs --> one way of adding a "did you mean"
+  suggestion facility to your own search applications using the Lucene
+  Spell Checker, an extension written by Nicolas Maisonneuve and David
+  Spencer.
+  </p>
+
+<h3> Techniques of Spell Checking </h3>
+
+  <p><!-- co: removed mdashes and replaced with a clause. Also
+  qualified last sentence dhs --> Automatic spell checking has a long
+  history. One important early paper was F. Damerau's <i>A technique
+  for computer detection and correction of spelling errors</i>
+  published in 1964, which introduced the idea of <i>minimum edit
+  distance</i>.  Briefly, the concept of edit distance quantifies the
+  idea of one string being "close" to another, by counting the number
+  of character edit operations such as insertions, deletions and
+  substitutions that are needed to transform one string into the
+  other.  Using this metric, the best suggestions to a misspelling are
+  those with the minimum edit distance.
+  </p>
+
+  <p>
+  Another approach is the <i>similarity key technique</i>, in which
+  words are transformed into some sort of key so that similarly
+  spelled and, hopefully, misspelled words have the same key.  To
+  correct a misspelling simply involves creating the key for the
+  misspelling and looking up dictionary words with the same key for a
+  list of suggestions.  Soundex is the best known similarity key, and
+  is often used for phonetic applications.
+  </p>
+
+  <p>
+  A combination of minimum edit distance and similarity keys (<a
+  href="http://aspell.net/metaphone/">metaphone</a>) is at the heart
+  of the successful strategy used by <a
+  href="http://aspell.sourceforge.net/">Aspell</a>, the leading
+  open-source spell checker.  However, it is a third approach that
+  underlies the implementation of "did you mean" technique described
+  in this article: letter <i>n-grams</i>.
+  </p>
+
+  <p>
+  A letter <i>n</i>-gram is a sequence of <i>n</i> letters of a
+  word. For instance, the word "lucene" can be divided into four
+  3-grams, also known as trigrams: "luc", "uce", "cen", and "ene". Why
+  is it useful to break words up like this? The intuition is that
+  misspellings typically only affect a few of the
+  constituent <i>n</i>-grams, so we can recognise the intended word
+  just by looking amongst correctly spelled words for those that share
+  a high proportion of <i>n</i>-grams with the misspelled word.  There
+  are various ways of computing this similarity measure, but one
+  powerful way is to treat it as a classic search engine problem with
+  an inverted index of <i>n</i>-grams into words. This is precisely
+  the approach taken by Lucene Spell Checker. Let's see how to use it.
+  </p>
+
+  <h3>A Simple Search Application</h3>
+
+  <p>
+  We'll first build a very simple search interface<!-- co: recast sentence to highlight that this does not show did you mean dhs --> that does not include the "did you mean" facility. It defines a single method that takes a search query string and returns a search result.
+  </p>
+
+  <pre>
+package org.tiling.didyoumean;
+
+import java.io.IOException;
+
+import org.apache.lucene.queryParser.ParseException;
+
+public interface SearchEngine {
+<!-- co: removed the comments. Comments are important in code listings but 
+should be replaced by text in an article 
+    /**
+     * Search for documents that match the user query using an underlying Lucene engine.
+     * @param queryString The user query.
+     * @return A collection of document hits.
+     * @throws IOException if there is a communications problem while searching the index.
+     * @throws ParseException if the query string cannot be interpreted.
+     */ 
+dhs -->
+    public SearchResult search(String queryString) throws IOException, ParseException;
+}
+  </pre>
+
+  <p>
+  The search result <!-- co: added the text up to "is a JavaBean"
+dhs --> is a SearchResult object which is a JavaBean that exposes a
+list of hits (actually just the top hits for simplicity), and a few
+other properties. I have omitted the constructor and getters in the
+listing here as they are boilerplate code. (The full source code is
+available in the accompanying download - see References at the end of
+the article.)
+  </p>
+
+  <pre>
+package org.tiling.didyoumean;
+
+import java.util.List;
+
+public class SearchResult {
+    
+    private List topHits;
+    private int totalHitCount;
+    private long searchDuration;
+    private String originalQuery;
+    private String suggestedQuery;
+
+    
+}
+  </pre>
+
+  <p>
+  Here's a very simple implementation of <code>SearchEngine</code> built with Lucene. It uses Lucene's
+  <code>QueryParser</code> to parse the search query string into
+  a <code>Query</code> that is then used to perform the search.
+  The Lucene <code>Hits</code> object is then mapped to an instance of our <code>SearchResult</code> class.
+
+  </p>
+
+  <pre>
+package org.tiling.didyoumean;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.Hits;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.store.Directory;
+
+public class SimpleSearchEngine implements SearchEngine {
+    
+    private String defaultField;
+    private String nameField;
+    private Directory originalIndexDirectory;
+    private int maxHits;
+    
+    public SimpleSearchEngine(String defaultField, String nameField, 
+            Directory originalIndexDirectory, int maxHits) {
+        this.defaultField = defaultField;
+        this.nameField = nameField;
+        this.originalIndexDirectory = originalIndexDirectory;
+        this.maxHits = maxHits; 
+    }
+
+    public SearchResult search(String queryString) throws IOException, ParseException {
+        long startTime = System.currentTimeMillis();
+        IndexSearcher is = null;
+        try {
+            is = new IndexSearcher(originalIndexDirectory);
+            QueryParser queryParser = new QueryParser(defaultField, new StandardAnalyzer());
+            queryParser.setOperator(QueryParser.DEFAULT_OPERATOR_AND);        
+            Query query = queryParser.parse(queryString);            
+            Hits hits = is.search(query);
+            long endTime = System.currentTimeMillis();
+            return new SearchResult(extractHits(hits), hits.length(), endTime - startTime, queryString);
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+    
+    private List extractHits(Hits hits) throws IOException {
+        List hitList = new ArrayList();
+        for (int i = 0, count = 0; i &lt; hits.length() &amp;&amp; count++ &lt; maxHits; i++) {
+            hitList.add(hits.doc(i).getField(nameField).stringValue());
+        }
+        return hitList;
+    }
+}
+  </pre>
+
+  <p>
+  With these ingredients it is straightforward to write a user
+  interface that accepts user queries and presents the search results
+  back to the user.  I chose <a
+  href="http://www.springframework.org/">Spring</a>'s <a
+  href="http://www.springframework.org/docs/reference/mvc.html">MVC</a>
+  framework for this. Since this is an article about search and not
+  about Spring, I won't present any of the code for the user interface
+  here &mdash; instead, please refer to the accompanying download.
+  </p>
+
+  <p>
+  Figure 1 is a screenshot of the search interface, running against an
+  index of <a
+  href="http://www.gutenberg.org/browse/authors/p#a292">texts</a>
+  by <a href="http://en.wikipedia.org/wiki/Beatrix_Potter">Beatrix
+  Potter</a> from <a href="http://www.gutenberg.org/">Project
+  Gutenberg</a>.
+  </p>
+
+  <p>
+  <img src="graphics/Figure1.png" alt="Figure 1" height="403" width="888"/><br/>
+  <i>Figure 1. A simple search application.</i>
+  </p>
+
+  <h3>Adding "Did You Mean" to the Simple Search</h3>
+
+  <p>
+  Next we'll extend the search to prompt with "did you mean"
+  suggestions for misspelled search terms in the query. <!-- co: I
+  think this section is easier to parse if we use subsections. That
+  does, however require this paragraph to be filled out with something
+  like "This will require the following steps" or something like that
+  dhs --></p>
+<h5> Generating a spell index </h5>
+
+<p>
+The first step is to generate an index from the original index that
+includes the letter <i>n</i>-grams for each word in the original
+index. I shall refer to this index as the <i>spell index</i>. With the
+help of the Lucene Spell Checker this is very easy:
+  </p>
+
+  <pre>
+package org.tiling.didyoumean;
+
+import java.io.IOException;
+
+
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.spell.Dictionary;
+import org.apache.lucene.search.spell.LuceneDictionary;
+import org.apache.lucene.search.spell.SpellChecker;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+
+public class DidYouMeanIndexer {
+    private static final String DEFAULT_FIELD = &quot;contents&quot;;
+    
+    private static final String FIELD_OPTION = &quot;f&quot;;
+    private static final String ORIGINAL_INDEX_OPTION = &quot;i&quot;;
+    private static final String SPELL_INDEX_OPTION = &quot;o&quot;;
+
+    public void createSpellIndex(String field,
+            Directory originalIndexDirectory,
+            Directory spellIndexDirectory) throws IOException {
+        
+        IndexReader indexReader = null;
+        try {
+            indexReader = IndexReader.open(originalIndexDirectory);
+            Dictionary dictionary = new LuceneDictionary(indexReader, field);
+            SpellChecker spellChecker = new SpellChecker(spellIndexDirectory);
+            spellChecker.indexDictionnary(dictionary);
+        } finally {
+            if (indexReader != null) {
+                indexReader.close();
+            }
+        }
+    }
+
+    
+}
+
+  </pre>
+
+  <p>
+  The <code>Dictionary</code> interface specifies a single method
+  </p>
+
+  <pre>public Iterator getWordsIterator();</pre>
+
+  <p>
+  that returns an iterator over the words in the dictionary. Here we
+  use a <code>LuceneDictionary</code> object to read each word in the
+  given <code>field</code> from the original index. We then create
+  a <code>SpellChecker</code> giving it a new index location to write
+  the <i>n</i>-grams to as it indexes the dictionary.
+  </p>
+
+  <p>
+  To create the spell index you can instantiate a
+  new <code>DidYouMeanIndexer</code> and invoke
+  the <code>createSpellIndex()</code> method from your
+  code. Alternatively, you can run <code>DidYouMeanIndexer</code> from
+  the command line (the <code>main()</code> method is not shown in the
+  above listing).
+  </p>
+<h5> The "did you mean" Search Engine</h5>
+  <p>
+  Next, let's turn back to our <code>SearchEngine</code> interface and
+  look at the implementation
+  of <code>DidYouMeanSearchEngine</code>. <!-- co: you need to help
+  your reader with this code. Call out the big idea - they can get the
+  rest from the code itself. dhs -->
+  </p>
+
+  <pre>
+package org.tiling.didyoumean;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.search.Hits;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.store.Directory;
+
+public class DidYouMeanSearchEngine implements SearchEngine {
+    
+    private String defaultField;
+    private String nameField;
+    private Directory originalIndexDirectory;
+    private int maxHits;
+    <b>private int minimumHits;
+    private float minimumScore;
+    private DidYouMeanParser didYouMeanParser;</b>
+    
+    public DidYouMeanSearchEngine(String defaultField, String nameField,
+            Directory originalIndexDirectory,
+            int maxHits, int minimumHits, float minimumScore,
+            DidYouMeanParser didYouMeanParser) {
+        
+        this.defaultField = defaultField;
+        this.nameField = nameField;
+        this.originalIndexDirectory = originalIndexDirectory;
+        this.maxHits = maxHits;
+        this.minimumHits = minimumHits;
+        this.minimumScore = minimumScore;
+        this.didYouMeanParser = didYouMeanParser;
+    }
+
+    public SearchResult search(String queryString) throws IOException, ParseException {
+        long startTime = System.currentTimeMillis();
+        IndexSearcher is = null;
+        try {
+            is = new IndexSearcher(originalIndexDirectory);
+            Query query = <b>didYouMeanParser.parse(queryString);</b>
+            Hits hits = is.search(query);
+            
+            <b>String suggestedQueryString = null;
+            if (hits.length() &lt; minimumHits || hits.score(0) &lt; minimumScore) {
+                Query didYouMean = didYouMeanParser.suggest(queryString);
+                if (didYouMean != null) {
+                    suggestedQueryString = didYouMean.toString(defaultField);
+                }
+            }</b>
+            
+            long endTime = System.currentTimeMillis();
+            return new SearchResult(extractHits(hits), hits.length(),
+                    endTime - startTime, queryString, <b>suggestedQueryString)</b>;
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+    
+    private List extractHits(Hits hits) throws IOException {
+        List hitList = new ArrayList();
+        for (int i = 0, count = 0; i &lt; hits.length() &amp;&amp; count++ &lt; maxHits; i++) {
+            hitList.add(hits.doc(i).getField(nameField).stringValue());
+        }
+        return hitList;
+    }    
+
+}
+
+  </pre>
+
+<!-- co: why is there a try without a catch? when do you anticipate finally to be called when try doesn't complete? dhs -->
+<h5> The "did you mean" Parser</h5>
+  <p>
+  The key difference between <!-- co:replaced "this class" dhs -->
+  the <code>DidYouMeanSearchEngine</code> class and
+  the <code>SimpleSearchEngine</code> class is the introduction of
+  the <code>DidYouMeanParser</code> interface. The <code>DidYouMeanParser</code> 
+   interface encapsulates a strategy both for parsing query
+  strings and for suggesting spelling corrections for query strings:
+  </p>
+
+  <pre>
+package org.tiling.didyoumean;
+
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.search.Query;
+
+public interface DidYouMeanParser {
+    public Query parse(String queryString) throws ParseException;
+    public Query suggest(String queryString) throws ParseException;
+}
+
+  </pre>
+
+  <p>
+ The <code>DidYouMeanSearchEngine</code> only asks
+ the <code>DidYouMeanParser</code> for a suggested query if the number
+ of hits returned falls below a minimum threshold
+ (the <code>minimumHits</code> property), or if the relevance of the
+ top hit falls below a minimum threshold (the <code>
+ minimumScore</code> property). Of course, you may choose to implement
+ your own criteria for when to make a "did you mean" suggestion, but
+ this rule is simple and effective.
+  </p>
+
+  <p>
+  The first implementation of <code>DidYouMeanParser</code> is straightforward:
+  </p>
+
+  <pre>
+package org.tiling.didyoumean;
+
+import java.io.IOException;
+
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.spell.SpellChecker;
+import org.apache.lucene.store.Directory;
+
+public class SimpleDidYouMeanParser implements DidYouMeanParser {
+    
+    private String defaultField;
+    private Directory spellIndexDirectory;
+    
+    public SimpleDidYouMeanParser(String defaultField, Directory spellIndexDirectory) {
+        this.defaultField = defaultField;
+        this.spellIndexDirectory = spellIndexDirectory;
+    }
+
+    public Query parse(String queryString) {
+        return new TermQuery(new Term(defaultField, queryString));
+    }
+
+    public Query suggest(String queryString) throws ParseException {
+        try {
+            SpellChecker spellChecker = new SpellChecker(spellIndexDirectory);        
+            if (spellChecker.exist(queryString)) {
+                return null;
+            }
+            <b>String[] similarWords = spellChecker.suggestSimilar(queryString, 1);</b>
+            if (similarWords.length == 0) {
+                return null;
+            }
+            return new TermQuery(new Term(defaultField, similarWords[0]));
+        } catch (IOException e) {
+            throw new ParseException(e.getMessage());
+        }
+    }
+
+}
+
+  </pre>
+<!-- co: I loved this paragraph and the graph before the code listing - I thought they made the algorithm completely clear dhs -->
+  <p>
+  The <code>parse()</code> method simply constructs a
+  new <code>TermQuery</code> from the query. (This means
+  that <code>SimpleDidYouMeanParser</code> only works with single word
+  queries, a deficiency we shall remedy later.)
+  The <code>suggest()</code> implementation is more interesting.  Just
+  as when we created the spell index earlier, we construct a
+  new <code>SpellChecker</code> with the index location for the spell
+  index. This time however, we just read from the index. First we
+  check if the query word is in the index &mdash; if it is we assume
+  that it is correctly spelled, and make no suggestion by
+  returning <code>null</code>. If instead, the query word is not in
+  the index then we ask the spell checker for a single suggestion, by
+  invoking the <code>suggestSimilar()</code> method. Of course, it may
+  happen that no words are similar enough to the input, so we
+  return <code>null</code> again. But if a suggestion is found, then
+  it is returned as a new <code>TermQuery</code>.
+  </p>
+
+  <p>
+  Whew! Let's see it in action after everything has been wired up using Spring.  Figure 2 is a screenshot for the misspelled query "lettice".
+  </p>
+
+  <p>
+  <img src="graphics/Figure2.png" alt="Figure 2" height="403" width="888"/><br/>
+  <i>Figure 2. Suggesting a sensible alternative query.</i>
+  </p>
+
+
+  <h3>How It Works</h3>
+
+  <p>
+  There's a lot going on in the <code>suggestSimilar()</code> method of <code>SpellChecker</code>, so let's follow it through with an example.
+  Take the correctly spelled word "lettuce", which appears in the Beatrix Potter texts I've used for this article. In the original index, where each Lucene document corresponds to a text, "lettuce" appears in two Lucene documents in the <code>contents</code> field. On the other hand, the spell index contains a whole Lucene document for every distinct word in the original index. Each document has a number of fields, as shown here with the values for the document representing the word "lettuce".
+  </p>
+
+  <table cellspacing="5" cellpadding="5">
+    <tr>
+      <th align="left">Field name</th>
+      <th align="left">Field values</th>
+    </tr>
+    <tr>
+      <td><code>word</code></td>
+      <td><code>lettuce</code> </td>
+    </tr>
+    <tr>
+      <td><code>start3</code></td>
+      <td><code>let</code> </td>
+    </tr>
+    <tr>
+      <td><code>gram3</code></td>
+      <td><code>let ett ttu tuc uce</code> </td>
+    </tr>
+    <tr>
+      <td><code>end3</code></td>
+      <td><code>uce</code> </td>
+    </tr>
+    <tr>
+      <td><code>start4</code></td>
+      <td><code>lett</code> </td>
+    </tr>
+    <tr>
+      <td><code>gram4</code></td>
+      <td><code>lett ettu ttuc tuce</code> </td>
+    </tr>
+    <tr>
+      <td><code>end4</code></td>
+      <td><code>tuce</code> </td>
+    </tr>
+  </table>
+
+  <p>
+  Notice how both trigrams and 4-grams are indexed. In fact, precisely which <i>n</i>-grams are indexed depends on the size of the word. For very short words unigrams and bigrams are indexed, whereas for longer words trigrams and 4-grams are indexed.
+  </p>
+
+  <p>
+  The <code>suggestSimilar()</code> method forms a Lucene query to search the spell index for candidate suggestions. For the misspelling "lettice" the query is as follows (split over two lines to make it easier to read):
+  </p>
+
+  <pre>
+start3:let^2.0 end3:ice gram3:let gram3:ett gram3:tti gram3:tic gram3:ice
+start4:lett^2.0 end4:tice gram4:lett gram4:etti gram4:ttic gram4:tice
+  </pre>
+
+  <p>
+  The start <i>n</i>-grams are given more weight than the other <i>n</i>-grams in the word, here they are boosted by a factor of 2, signified by the <code>^2.0</code> notation. Another reason to index the start and end <i>n</i>-grams separately is because they are positional, unlike the other <i>n</i>-grams. For example, the words "eat" and "ate" have the same set of unigrams and bigrams (<code>gram1:e gram1:a gram1:t gram2:ea gram2:at</code>), so they need the start and end fields to distinguish them (<code>start1:e end1:t start2:ea end2:at</code> for "eat", and <code>start1:a end1:e start2:at end2:te</code> for "ate").
+  </p>
+
+  <p>
+  Using a Lucene index browser, such as the excellent <a href="http://www.getopt.org/luke/">Luke</a> &mdash; the Lucene Index Toolbox, we can manually run this query against the spell index. Figure 3 shows what we get.
+  </p>
+
+  <p>
+  <img src="graphics/Figure3.png" alt="Figure 3" height="648" width="816"/><br/>
+  <i>Figure 3. Browsing the spell index.</i>
+  </p>
+
+  <p>
+  But the top hit is "letting" &mdash; not "lettuce" that the webapp presented us with. What's going on? The answer is that the Lucene Spell Checker ranks suggestions by edit distance, not by search relevance. The string "lettice" differs from "lettuce" by a single substitution, whereas "letting" is two substitutions away.
+  </p>
+
+  <h3>Supporting Composite Queries</h3>
+
+  <p>
+  <code>SimpleSearchEngine</code> supports composite queries &mdash; that is queries that are composed of a set of clauses, for example <code>lettuce parsley</code>, which means find documents in which both of  the words "lettuce" and "parsley" appear. As noted above, <code>DidYouMeanSearchEngine</code> with <code>SimpleDidYouMeanParser</code> only supports single word queries, so let's see how we can fix it to support composite queries.
+  </p>
+
+  <p>
+  <code>CompositeDidYouMeanParser</code> is an implementation of <code>DidYouMeanParser</code> for use by <code>DidYouMeanSearchEngine</code> which supports composite queries. Recall that the <code>DidYouMeanParser</code> interface has a <code>parse()</code> method and a <code>suggest()</code> method, both of which take query strings and return Lucene <code>Query</code> objects. The implementation of <code>parse()</code> is simple: it uses Lucene's <code>QueryParser</code>, which has inbuilt support for composite queries. The implementation of <code>suggest()</code> is a little more tricky. It relies on the <code>getFieldQuery()</code> extensibility hook provided by <code>QueryParser</code>, so if a term (or a word in a phrase) is misspelled, then it is replaced with the best suggestion. If no terms (or words in a phrase) in the whole query are misspelled then <code>suggest()</code> returns <code>null</code>.
+  </p>
+
+  <p>
+  Figure 4 is a screenshot for the misspelled composite query "lettice parslee".
+  </p>
+
+  <p>
+  <img src="graphics/Figure4.png" alt="Figure 4" height="403" width="888"/><br/>
+  <i>Figure 4. Correcting the spelling in multiple query terms.</i>
+  </p>
+
+
+  <h3>Ensuring High-Quality Suggestions</h3>
+
+  <p>
+  Having a clever algorithm for detecting and correcting spelling
+  errors is a good start, but you need a good source of correctly
+  spelled words to ensure the suggestions are of a high quality. So
+  far we have used the terms in the original index as the source of
+  words (by constructing a <code>LuceneDictionary</code>). There is a
+  downside to this approach: the content that was indexed will almost
+  certainly contain spelling errors, so there is a good chance that
+  certain query suggestions will be misspelled.
+  </p>
+
+  <p>
+  You might think that using a compiled <a
+  href="http://wordlist.sourceforge.net/">word list</a> might
+  help. However, even the largest dictionaries fall short in word
+  coverage for proper nouns and newly coined words (e.g. technical
+  phrases), so a correctly spelled query term that is not in the
+  dictionary will be incorrectly marked as a misspelling. The user
+  would then be prompted with a distracting alternative query
+  suggestion. (As a side note, Lucene Spell Checker provides an
+  implementation
+  of <code>Dictionary</code>, <code>PlainTextDictionary</code>, which
+  can read words from a word list such as <code>/usr/dict/words</code>
+  commonly found on Unix systems. Use this to do regular spell
+  checking against a dictionary.)
+  </p>
+
+  <p>
+  Lucene Spell Checker provides a mechanism to solve this problem, while still using the original index as the source of words. The <code>suggestSimilar()</code> method <code> of SpellChecker</code> is overloaded to support secondary sorting of the suggested words by document frequency in an index.
+  For example,
+  </p>
+
+  <pre>
+spellChecker.suggestSimilar(queryText, 1, originalIndexReader, defaultField, true);
+  </pre>
+
+  <p>
+  This call restricts suggestions to those words that are more popular (<code>true</code>) in the original index than the query term. On the plausible assumption that across the whole set of documents misspellings are less common than the correctly spelled instances of the word, this modification will improve the quality of suggestions, even in document collections containing misspellings.
+  </p>
+
+  <h4>Zeitgeist</h4>
+
+  <p>
+  Large search engines use user queries for the source of suggestions. The logic is: if you don't understand what a user is asking for, compare it to what other users ask for, as someone else is likely to have searched for something similar.
+  </p>
+
+  <p>
+  To implement this strategy, each user query submitted to the system should be indexed in the spell index in order to provide a proper record of query frequencies. (All the main search engines publish their <a href="http://searchenginewatch.com/facts/article.php/2156041">most popular search terms</a>, which are ultimately derived from such an index.) Then, by using the overloaded <code>suggestSimilar()</code> method introduced in the previous section, suggestions will be ranked firstly by edit distance and secondly by user popularity.
+  </p>
+
+  <h3>Conclusion</h3>
+
+  <p>
+  Spell checking users' search queries is a nice feature, and relatively easy to add to a Lucene-powered search application, as this article has shown. Most of the time the corrections are good ones, but there is plenty of ongoing research in the information retrieval community into improving spell check algorithms (see References below). I think we will continue to see the fruits of such research in open-source libraries like Lucene Spell Checker.
+  </p>
+
+  <!--p>
+  Dictionary is used as a source of suggestions.
+  1. Compiled dictionary: pros: won't suggest misspellings; cons: unlikely to contain all (correctly spelled) words in index
+  2. Content index: pros: will only make suggestions that will match terms in the index; cons: will likely contain misspellings which will be suggested.
+  3. User queries: pros: makes suggestions that other users favour; cons: only suitable for sites with high search traffic, commonly misspelled words may outweigh the correct spelling by users and be offered as suggestions (e.g. Britney Speers*)
+
+  </p>
+
+  <p>
+  Word not in dict => misspelled - look for other
+  [Word in dict => word spelt OK... Need to discuss this assumption]
+  [Criteria for when to do dym... E.g. search engines typically spell check against other user queries, but only feasible for sites with lots of traffic.]
+  </p>
+
+  <p>
+  [Put this para in Gotchas/Advanced section, as it is more sophisticated...] It is actually possible to do a secondary sort by term frequency by using the overloaded <code>suggestSimilar()</code> method which takes a Lucene <code>IndexReader</code>. A powerful application of this could be used on sites with a large number of user searches. By supplying an index of <i>queries</i>, the suggestions would be for terms that other users favour. Note that the index of queries has to be updated after each user query in order to maintain a proper record of query frequencies. [Talk about the morePopular field &mdash; allows you to always try for suggestions?] Assumption: correct spellings by users outnumber misspellings.
+  </p>
+
+  <p>
+  Criteria for providing dym prompts:
+  1. Poor quality matches, or
+  2. Misspelling detected (not in dictionary)
+  </p>
+
+  <h3>Other stuff</h3>
+  <p>
+  * Comparison of ngram with other?
+  * How to support "Did you mean" when using a stemming analyzer.
+  * Why short typos don't always get good suggestions. (hinted at above)
+  </p-->
+
+<!-- co: can your comment above be removed? dhs -->
+  <h3>References</h3>
+  <ul>
+    <li>Download <a href="didyoumean.zip"> the code supporting this article</a>. The distribution includes everything you need to get up and running quickly, including a pre-built index that you can unpack on your filesystem, and a WAR file to drop into your servlet container.</li>
+    <li>I used <a href="http://lucene.apache.org/">Lucene 1.4.3</a> and <a href="http://wiki.apache.org/jakarta-lucene/SpellChecker">Lucene Spell Checker 1.1</a> in this article.</li>
+    <li>David Spencer, who created Lucene Spell Checker, has an interesting <a href="http://www.searchmorph.com/">website</a> dedicated to search experiments.</li>
+    <li><a href="http://aspell.sourceforge.net/">Aspell</a> and its Java cousin <a href="http://jazzy.sourceforge.net/">Jazzy</a> are good general purpose spell checkers.</li>
+    <li>I leaned heavily on Thomas Risberg's thorough <a href="http://www.springframework.org/docs/MVC-step-by-step/Spring-MVC-step-by-step.html">Developing a Spring Framework MVC application step-by-step</a> for building the Spring Search UI.</li>
+    <li><i><a href="http://portal.acm.org/citation.cfm?doid=363958.363994">A technique for computer detection and correction of spelling errors</a></i> (Communications of the ACM, 7(3), 171 - 176; 1964) by
+Fred J. Damerau, is an early paper on spelling correction.</li>
+    <li><i><a href="http://portal.acm.org/citation.cfm?id=146380&amp;coll=portal&amp;dl=ACM&amp;CFID=30871880&amp;CFTOKEN=81445918">Techniques for automatically correcting words in text</a></i> (ACM Computing Surveys, 24(4), 377-439; 1992) by
+Karen Kukich, is the definitive survey article on spelling correction.</li>
+    <li><a href="http://www-cs-faculty.stanford.edu/~knuth/taocp.html">The Art of Computer Programming</a>, Volume 3, Sorting and Searching (Addison-Wesley; 1998), by Donald E. Knuth contains the definitive description of the Soundex algorithm.</li>
+    <li><i><a href="http://xldb.di.fc.ul.pt/data/Publications_attach/spellcheck.pdf">Spelling Correction for Search Engine Queries</a></i> by  Bruno Martins and Mario J. Silva, solves the same problem as the present article using a set of heuristics to make spelling suggestions.</li>
+    <li><i><a href="http://acl.ldc.upenn.edu/acl2004/emnlp/pdf/Cucerzan.pdf">Spelling correction as an iterative process that exploits the collective knowledge of web users</a></i> (2004 Proceedings of EMNLP 2004 293-300) by  S. Cucerzan and E. Brill, is an interesting paper which talks about how spelling correction can be driven from knowledge acquired by a search engine.</li>
+    <li>Unsurprisingly, <a href="http://labs.google.com/papers.html">Google</a>, <a href="http://research.yahoo.com/publications.shtml">Yahoo</a>, and <a href="http://research.microsoft.com/research/detail.aspx?id=7">Microsoft</a> all have a lot of published information on information retrieval.</li>
+  </ul>
+
+  </body>
+</html>

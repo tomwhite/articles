@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+  <head>
+    <title>Using XML Catalogs with JAXP</title>
+  </head>
+
+  <body>
+
+    <h2>Using XML Catalogs with JAXP</h2>
+    <p>
+    by Tom White
+    </p>
+
+    <p>
+    XML documents often refer to other documents which an XML processor will normally have to retrieve to make sense of the main document. These external resources, typically referred to by URIs, may be local files; or they may be remote, distributed across the web. In an ideal world the difference would be invisible, since it would be as cheap to access a remote resource as a local one. However, in the real world network failures do occur, and it is wise to design applications that take this into account.
+    </p>
+
+    <p>
+    XML Catalogs offer a way to manage local copies of public DTDs, schemas, or indeed any XML resource that exists outside of the referring XML instance document. Rather than modifying the XML instance document to refer directly to a local copy, you leave the reference to the remote resource and write an XML Catalog that maps remote references to local resources. Your application then installs a resolver, whose job it is to  consult the catalog whenever an external resource is needed. The Apache xml-commons project's <a href="http://xml.apache.org/commons/components/resolver/index.html">Resolver package</a>, from <a href="http://norman.walsh.name/">Norman Walsh</a>, is a collection of Java classes for working with XML Catalogs. This article looks at how to use the Resolver classes with JAXP by working through three XML processing examples that cover the main capabilities of XML Catalogs.
+    </p>
+
+    <p>
+    <a href="http://www.oasis-open.org/committees/entity/specs/cs-entity-xml-catalogs-1.0.html">XML Catalogs</a> is currently an OASIS Committee Specification, which is a draft specification on track to becoming an OASIS Standard. It is a direct descendent of work done on catalogs for SGML systems, the current standard being the <a href="http://www.oasis-open.org/specs/a401.htm">OASIS Technical Resolution TR9401</a> plain-text catalog format. This standard can also be used for XML applications; indeed the xml-commons Resolver supports TR9401 catalogs too, although they are not covered in this article.
+    </p>
+
+
+    <h3>Example 1 - Offline Validation of XHTML Pages</h3>
+
+    <p>
+    For the first example, let's look at a common situation where XML Catalogs are useful: in providing a local copy of a DTD. Suppose you want to check that a page is valid XHTML - before you put it on your website, for example. Here's a sample XHTML page to be checked:
+    </p>
+
+    <pre>
+@documents/recipe.html@
+    </pre>
+
+    <p>
+    The obvious way to perform the check from Java would be to use an event-based parser, such as the JAXP SAX parser shown here:
+    </p>
+
+    <pre>
+@src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingSaxParser.java@
+    </pre>
+
+    <p>
+    where <code>DefaultErrorHandler</code> is an implementation of <code>org.xml.sax.ErrorHandler</code> that prints warnings to standard error, and throws exceptions when errors or fatal errors occur during parsing. Since the parser is validating the XHTML document against the declared DOCTYPE, it will retrieve the DTD from W3C's website at <i>http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd</i>. (It is worth noting as an aside that the DTD may be retrieved even if the parser is not validating, as <a href="http://www.w3.org/TR/2004/REC-xml-20040204/#include-if-valid">this part of the XML spec</a> explains.) For some applications this might not be a problem, but others might not have the luxury of a permanent net connection - a J2ME Connected Limited Device Configuration, for instance. Even if a net connection is available it might be slow, causing the page checker to be unacceptably slow; or the resource might not be available (if W3C's website is down), causing the page checker to break.
+    </p>
+
+    <p>
+    We can solve all these potential problems by using an catalog. A catalog is made up of one or more <i>catalog entry files</i>. Here is the simplest catalog entry file, called <i>catalog.xml</i>, that can be used to resolve the public identifier for an XHTML document to a local copy of the XHTML 1.0 DTD:
+    </p>
+
+    <pre>
+@catalog.xml@
+    </pre>
+
+    <p>
+    A catalog entry file is made up of a number of catalog entries. This one has a single <code>public</code> entry that describes a mapping between the public identifier of an entity - in this case <i>-//W3C//DTD XHTML 1.0 Strict//EN</i> - and a preferred URI to locate the entity - in this case the file <i>catalog/xhtml1-strict.dtd</i> relative to <i>catalog.xml</i>. You need to manually download the DTD (and the referenced external entity files for XHTML) and put it in the correct local directory - the catalog simply provides the mapping, it doesn't provide automatic caching facilities.
+    </p>
+
+    <p>
+    To plug the catalog into our application we need to use the <a href="http://xml.apache.org/commons/">Apache xml-commons project</a>'s Resolver component. For a JAXP application, the key class is <code>org.apache.xml.resolver.tools.CatalogResolver</code>, an implementation of <code>org.xml.sax.EntityResolver</code>, which as the name suggests is the interface JAXP parsers use to customize handling of external entities. To register the resolver, call the <code>setEntityResolver()</code> method on the SAX <code>XMLReader</code> instance, passing in a new instance of <code>CatalogResolver</code>. (Similarly, in the case of a JAXP DOM parser, the <code>CatalogResolver</code> is set on the <code>DocumentBuilder</code> using the <code>setEntityResolver()</code> method.)
+    </p>
+
+    <pre>
+@src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingWithCatalogSaxParser.java@
+    </pre>
+
+    <p>
+    But how does the <code>CatalogResolver</code> find XML Catalog entry files? One way to configure this is by setting the system property <code>xml.catalog.files</code> to a semicolon-separated list of catalog entry files; by passing a command-line property to the Java Virtual Machine, for example <code>-Dxml.catalog.files=/catalog/catalog.xml</code>. However, using an absolute path is best avoided since it restricts the portability of your application. Web applications, for instance, should be written in such a way as not to depend on where they are deployed on the filesystem, as this is typically out of their control.
+    </p>
+
+    <p>
+    A better way to specify catalogs is to provide a properties file with a relative path to the catalog entry files. <code>CatalogResolver</code> uses a <code>CatalogManager</code> class that automatically looks for a properties file called <i>CatalogManager.properties</i> on the classpath. The following properties file achieves the same effect as setting the system property <code>xml.catalog.files</code>:
+    </p>
+
+    <pre>
+# Catalogs are relative to this properties file
+relative-catalogs=false
+# Catalog list
+catalogs=catalog.xml
+    </pre>
+
+    <p>
+    Notice that the property <code>relative-catalogs</code> is set to <code>false</code>, which may seem a little counter-intuitive. If <code>relative-catalogs</code> is set to <code>true</code> then the filenames that appear in the <code>catalogs</code> property are left unchanged, so a relative path will be relative to the current directory of the JVM. On the other hand, if set to <code>false</code>, relative paths are made absolute with respect to the <i>CatalogManager.properties</i> file. A full list of properties and their behavior is fully described in the <a href="http://xml.apache.org/commons/components/apidocs/resolver/org/apache/xml/resolver/CatalogManager.html">API documentation</a> for <code>CatalogManager</code>.
+    </p>
+
+    <p>
+    Finally, we can run the page checker application offline since the <code>EntityResolver</code> will use the local catalog to load the DTD. To prove that no net connection is required, I have written a JUnit test that runs with a security manager that blocks all net access. This test, along with all the other examples in this article, is available in the <a href="xmlcatalogs.zip">download</a>.
+    </p>
+
+    <h3>Example 2 - W3C XML Schema Validation</h3>
+
+    <p>
+    In the same way that an XML document may associate itself with a DTD via the <code>DOCTYPE</code> declaration, an XML document may associate itself with a W3C XML Schema using a <i>schema location hint</i>. This example looks at how to validate a document against a schema specified in this way.
+    </p>
+
+    <p>
+    A schema location hint is an <code>xsi:schemaLocation</code> attribute  on an element - typically the root - whose value is a list of namespace URIs and URIs for the schemas to validate elements in those namespaces. Alternatively, if the elements are not in a namespace, a schema location hint is an <code>xsi:noNamespaceSchemaLocation</code> attribute whose value is a URI for the schema.
+    The <code>xsi</code> prefix is bound to the <i>http://www.w3.org/2001/XMLSchema-instance</i> namespace URI.
+    </p>
+
+    <p>
+    For example, here is an XML instance document that describes a recipe, and declares itself to be valid with respect to the schema located at <i>http://tiling.org/xmlcatalogs/schemas/recipe.xsd</i> in the <i>http://tiling.org/xmlcatalogs/namespaces/recipe</i> namespace:
+    </p>
+
+    <pre>
+@documents/recipe.xml@
+    </pre>
+
+    <p>
+    Although not explicitly marked as a system identifier we can use a catalog with a <code>system</code> element to associate the schema with a local copy.
+    </p>
+
+    <pre>
+@schema_catalog.xml@
+    </pre>
+
+    <p>
+    Then, we can use the same JAXP SAX code as before - with one important change - to validate the XML instance document using the local schema. The only change needed is to tell JAXP which schema language to use when performing validation. In this case it is W3C XML Schema, which is configured by setting a property on the <code>SAXParser</code>, as show below. Note that if the JAXP parser you are using does not implement  specification version 1.2 or later, then attempting to set the property will fail by throwing an <code>IllegalArgumentException</code>. (It is worth mentioning in passing that for a DOM parser you set the same property name and value by calling the <code>setAttribute()</code> method on the <code>DocumentBuilderFactory</code>.)
+    </p>
+
+    <pre>
+@src/org/tiling/xmlcatalog/parsers/sax/SchemaValidatingWithCatalogSaxParser.java@
+    </pre>
+
+    <p>
+    Another benefit that catalogs offer, in addition to protection from network failure, is the ability to substitute a public resource with a local one that better fits your particular application's needs. For example, in the case of schema validation, it might be useful to validate against a local schema that imposes stronger constraints than the public one. Another way of achieving this effect - but only in the case of schema validation - is by explicitly instructing the parser to validate against a given schema; effectively overriding the schema location hint. Just set the property <code>http://java.sun.com/xml/jaxp/properties/schemaSource</code> to a value specifying the schema to use.
+    This is explained in detail in the <a href="http://java.sun.com/xml/jaxp/change-requests-11.html">JAXP 1.2
+maintanence specification</a>.</p>
+
+    <h3>Example 3 - Remote Stylesheet Includes</h3>
+
+    <p>
+    For the third example of catalogs in action, we turn to XSLT transforms and see how one stylesheet can include (or import) another. The <code>xsl:include</code> instruction, which the XSLT processor replaces with the contents of the referenced stylesheet, allows stylesheet authors to split stylesheets into modular documents. For example, the following skeleton stylesheet (for transforming the recipe XML file in the previous section into XHTML) includes a set of public XSLT utilities.
+    </p>
+
+    <pre>
+@documents/recipe_with_include.xslt@
+    </pre>
+
+    <p>
+    This time the catalog uses a <code>uri</code> element to specify the match for the included file reference:
+    </p>
+
+    <pre>
+@xslt_catalog.xml@
+    </pre>
+
+    <p>
+    JAXP provides an interface called <code>javax.xml.transform.URIResolver</code> that allows applications to intercept calls to the <code>xsl:include</code> and <code>xsl:import</code> instruction, and the <code>document()</code> function. <code>CatalogResolver</code> implements this interface too, using the URI mappings from its catalog to resolve resources. So in the transform code we simply call the <code>setURIResolver()</code> method on the <code>TransformerFactory</code>, passing in an instance of <code>CatalogResolver</code>. Then we can create a new <code>Transformer</code> instance, and it will be set up to use the local file <i>utils.xslt</i>.
+    </p>
+
+    <pre>
+@src/org/tiling/xmlcatalog/transform/WithCatalogXsltTransformer.java@
+    </pre>
+
+    <h3>Developing More Complex Catalogs</h3>
+
+    <p>
+    XML Catalogs offer several other useful features. For instance, you can <a href="http://www.oasis-open.org/committees/entity/specs/cs-entity-xml-catalogs-1.0.html#s.delegatepublic">delegate</a> a match to another catalog; and you can <a href="http://www.oasis-open.org/committees/entity/specs/cs-entity-xml-catalogs-1.0.html#d0e292">chain</a> catalogs together using the <code>nextCatalog</code> element. Also useful is the ability to map a set of mirrored resources using a single rewrite entry, as the following catalog entry file illustrates.
+    </p>
+
+    <pre>
+@rewrite_catalog.xml@
+    </pre>
+
+    <p>
+    The <code>rewriteSystem</code> instructs the resolver to replace the start string for any matching system identifier with the given prefix. In this case, all schemas that begin with the string <i>http://tiling.org/xmlcatalogs/schemas/</i> are mirrored in the local directory <i>catalog/</i> relative to the catalog entry file.
+    </p>
+
+    <p>
+    The XML Catalogs we have seen so far have each consisted of just a single entry file with a single entry. An XML Catalog can be made up of a list of catalog entry files, each considered in turn, although subsequent files are not consulted if a match is found in an earlier file. Within each catalog entry file there are rules that govern resolution - for a full list, see the <a href="http://www.oasis-open.org/committees/entity/specs/cs-entity-xml-catalogs-1.0.html#s.ext.resx">specification</a>. For example, <code>system</code> entries are considered for matching before <code>rewriteSystem</code> entries.
+    </p>
+
+    <p>
+    When developing larger catalogs an identifier may not be resolved to the URI you expect. It can pay to write unit tests that test resolution, perhaps by restricting net access (like the <a href="xmlcatalogs.zip">examples</a> that accompany this article). Even with tests, however, diagnostic tools can be useful. The simplest way to see what is going on during resolution is to set the <code>CatalogManager</code> property <code>verbosity</code> to a non-zero number - the higher the number the more information you get.
+    </p>
+
+    <p>
+    You can manually try resolution from the command line using the <i>resolver</i> application that is supplied in the Resolver package. The following session shows resolution of an XHTML DOCTYPE, such as the one in the first example at the beginning of this article.
+    </p>
+
+    <pre>
+$ java -jar lib/resolver.jar -c catalog.xml \
+  -p "-//W3C//DTD XHTML 1.0 Strict//EN" \
+  -s http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd doctype
+Cannot find CatalogManager.properties
+Resolve DOCTYPE (name, publicid, systemid):
+  public id: -//W3C//DTD XHTML 1.0 Strict//EN
+  system id: http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd
+Result: file:/tom/workspace/xmlcatalogs/catalog/xhtml1-strict.dtd
+    </pre>
+
+    <h3>Conclusion</h3>
+
+    <p>
+    Using XML Catalogs to manage a local store of external resources can make your JAXP applications more robust and faster by removing the dependency on the network. Furthermore, XML Catalogs is a standard with ever increasing support - for example, the recently released <a href="http://ant.apache.org/">Ant 1.6</a> supports XML Catalogs - so it is easy to reuse your catalog entry files.
+    </p>
+
+    <h3>Resources</h3>
+
+    <ul>
+      <li><a href="xmlcatalogs.zip">Download</a> the example code and tests accompanying this article.</li>
+      <li>The official specification: <a href="http://www.oasis-open.org/committees/entity/specs/cs-entity-xml-catalogs-1.0.html">XML Catalogs, Committee Specification 1.0, OASIS Open, Inc</a></li>
+      <li>To get the latest version of <a href="http://java.sun.com/xml/jaxp/">JAXP</a> you will need to download the <a href="http://java.sun.com/webservices/jwsdp/">Java Web Services Developer Pack</a>.</li>
+      <li><a href="http://xml.apache.org/commons/components/apidocs/resolver/overview-summary.html">Documentation for Apache xml-commons Resolver</a></li>
+      <li>Bob DuCharme (1 November 2000), <a href="http://www.xml.com/pub/a/2000/11/01/xslt/">Combining Stylesheets with Include and Import</a>. <a href="http://xml.com/">XML.com</a>. Nice introduction to the include and import instructions.</li>
+      <li>Bob DuCharme (6 March 2002), <a href="http://www.xml.com/pub/a/2002/03/06/xslt.html">Reading Multiple Input Documents</a>. <a href="http://xml.com/">XML.com</a>. How to use the XSLT document() function.</li>
+      <li>Benoit Marchal (22 May 2003), <a href="http://www-106.ibm.com/developerworks/xml/library/x-tipvalschm/"> Tip: Tell a parser where to find a schema</a>. <a href="http://www-136.ibm.com/developerworks">IBM developerWorks</a>.</li>
+      <li>Elizabeth David, French Provincial Cooking. Penguin Books (1998). For the full omelette recipe.</li>
+    </ul>
+
+  </body>
+</html>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog
+  xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+
+  <@open_bold@system systemId="http://www.bbc.co.uk/syndication/feeds/news/rss-0.91.dtd"@close_bold@
+    uri="catalog/rss-0.91.dtd"/>
+
+</catalog>

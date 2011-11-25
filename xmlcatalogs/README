@@ -1,0 +1,12 @@
+Code and tests accompanying "Using XML Catalogs with JAXP"
+----------------------------------------------------------
+
+To run the tests using the supplied Ant build file you will need 
+Ant and a JAXP 1.2 (or later) implementation. The ant file has been
+tested with JDK 1.3 and 1.4 using the Java Web Services Developer
+Pack 1.3. To use another JAXP implementation see the guidance notes here:
+http://java.sun.com/developer/EJTechTips/2003/tt0311.html#1.
+
+The command to run the tests is:
+
+ant -Djaxp.lib.dir=<JWSDP_HOME>/jaxp/lib

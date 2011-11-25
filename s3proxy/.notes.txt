@@ -1,0 +1,46 @@
+ec2-add-group all-ec2-instances -d "Group containing all Amazon EC2 instances."
+ec2-authorize all-ec2-instances -p 80 -s 216.182.224.0/20 -s 72.44.32.0/19 -s 67.202.0.0/18 -s 75.101.128.0/17
+# see http://developer.amazonwebservices.com/connect/thread.jspa?messageID=51028
+# be good if amazon had a named public group that they managed for this purpose
+
+ec2-add-group ec2-private-subnet -d "Group containing all Amazon EC2 instances."
+ec2-authorize ec2-private-subnet -p 80 -s 10.0.0.0/8
+# Just use private EC2 address space
+
+1TB $150 per month to host
+but $180 for each transfer out of Amazon! This is why it is expensive to host open datasets!
+(There are also some small transfer costs - 1 cent per 10000 requests.)
+
+By running an EC2 proxy, at 10 cents per hour (small instance) - or $72 a month, you can allow folks using EC2 to access the data for free! While running the proxy is not free, it is a fixed cost that might be acceptable to some organizations.
+
+be nice if amazon could add this feature to S3 so you can specify that it is only accessible from EC2
+
+# Run a vanilla Ubuntu instance:
+ec2-run-instances -k gsg-keypair ami-159e7a7c
+
+# Copy across the s3proxy distribution
+scp -i ~/.ec2/id_rsa-gsg-keypair build/dist/s3proxy-0.1.tar.gz root@ec2-75-101-204-111.compute-1.amazonaws.com:
+# And keys:
+scp -i ~/.ec2/id_rsa-gsg-keypair ~/.ec2/*.pem root@ec2-75-101-204-111.compute-1.amazonaws.com:/mnt
+
+# Log in and install Java
+apt-get -y install sun-java6-jre
+
+# And install the s3proxy
+tar zxf s3proxy*.tar.gz
+rm s3proxy*.tar.gz
+
+# Edit /etc/rc.local to run /root/s3proxy-0.1/s3proxy.sh
+
+# Bundle
+ec2-bundle-vol -d /mnt -k /mnt/pk*.pem -c /mnt/cert*.pem -u 111560892610 -s 3072 -p s3proxy-0.1 -r i386
+ec2-upload-bundle -b s3proxy -m /mnt/s3proxy-0.1.manifest.xml -a 18K4VFS99J8R21G8TBR2 -s EVf+5YzNyDMMXU12VFUf3N+LrTTSU/iWsf81Sp/M
+
+# Register
+ec2-register s3proxy/s3proxy-0.1.manifest.xml
+
+# Run it!
+ec2-run-instances -k gsg-keypair -g ec2-private-subnet -d "18K4VFS99J8R21G8TBR2 EVf+5YzNyDMMXU12VFUf3N+LrTTSU/iWsf81Sp/M s3.amazonaws.com" ami-fffd1996
+
+
+

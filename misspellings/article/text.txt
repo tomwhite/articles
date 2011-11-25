@@ -1,0 +1,99 @@
+Soundex, Sequence Comparison and Misspellings
+---------------------------------------------
+
+Abstract
+--------
+This article centres on automated ways of matching a misspelt word with a database of (correctly spelt) words. Two approaches are taken. Firstly the Soundex algorithm and its variants are examined to see how simple phonetics can provide matches between incorrectly spelt words and the target word. Secondly metrics that define the notion of "distance" between two words are used to find close matches to a misspelling.
+
+Intro
+-----
+
+Computers are very good at searching large databases of information. Sometimes however, people are not very good at knowing exactly what they are searching for. For example, when searching for information on family history it is common to want to retrieve records of people whose name is close to yours, to allow for the possibility that you family name has changed or has been incorrectly spelled. In this case you don't know all the variants of the name to be used as the search term. You might be able to come up with some possible variants through guesswork, but really it would be preferable if you could ask the computer to match names that "sound like" your name.
+
+Or suppose you are using a word processor and you write the word "neccesary". What is a good strategy for suggesting replacements for the misspelling?
+
+Both of these scenarios are really aspects of the same problem: how to do a dictionary search for matches against a fuzzily defined search term? This article will look at two radically different techniques that promise to provide a solution to this problem. The first that we examine is called the <i>Soundex algorithm</i>, which reduces a word to its "phonetic kernel" and enables it to be compared to other words on the basis of how it is pronounced. The second looks at words as character sequences and defines a notion of "distance" between any two character sequences. This approach encompasses the "Sequence Metric" algorithms, the most useful of which is the "Levenshtein algorithm".
+
+----
+
+In 1917 Robert C. Russell filed a patent at[?] the US Patent office that proposed a solution to this problem that claimed to "provide an index wherein names are entered and grouped phonetically rather than according to the alphabetic construction of the names". This algorithm, now know as "Soundex" [who came up with this term?] has been employed to index all US censuses from 1920 onwards. So how does it work?
+
+----
+
+The basic idea behind the Soundex algorithm is to map letters to a numerical code representing their phonetic group. Thus ''d'' and ''t'' are in the same group since they sound alike - indeed they are vocalised by a similar mechanism. By applying this mapping to a whole word a phonetic "key" for the word is produced.
+
+The most popular form of the algorithm is the one explained in Knuth's The Art Of Computer Programming, Volume 3 [...]. It goes as follows:
+
+1. The first letter of the word is retained as the first character of the Soundex code.
+2. All the following letters are dropped: a,e,i,o,u,h,w, and y.
+3. Any consonants that appear consecutively are only coded once, that is consecutive repeats are dropped. [~ same code value]
+4. The following mappings are made for the remaining letters:
+
+b, f, p, v -> 1
+c, s, k, g, j, q, x, z -> 2
+d, t -> 3
+l -> 4
+m, n -> 5
+r -> 6
+
+5. The Soundex code is adjusted so that it is four characters long. If it is more than four characters rightmost characters are dropped; if less, zeros are appended.
+
+Table 1 contains some examples of names and their soundex codes. These examples illustrate some of the characteristics of the algorithm.
+
+Words that sound distinct may have the same soundex code ("White"/"Wood"). This is not surprising since Soundex was designed to group names that sound <i>alike</i>, not just those that sound <i>identical</i>. However, vowels do sound different and Soundex ignores them if they are not the initial letter. Of course, consonants can vary in how they are pronounced according to how they combine with surrounding letters: [example].
+
+The algorithm described here [name it] maps large groups of consonants to the same phonetic digit. For applications where the database has a large number of records being searched this can lead to a large number of matches. This is the case in spell-checking, where the Soundex algorithm matches "algorithum" with a rather varied set of words:
+
+	alacrity, algorithm, algorithmic, alizarin, allegoric, allegory, allegro
+
+For a spell-checking algorithm we normally require the matching to be more stringent - to weed out the more unlikely matches. A simple way of achieving this is to refine the consonant mappings: in this case by placing 'c', 'g' and 'z' in different classes "alacrity" and "alizarin" not longer match "algorithum". 
+
+The fact that the Soundex code is adjusted to being four characters long means that the ends of long words are ignored. This is less of a problem for names [Christian, Christianson - is it?]
+Again, for spell-checking this peculiarity is best dropped. Altering the algorithm to use more consonant classes and to not adjust the code length to four gives the <i>refined Soundex algorithm</i>. [See box]
+The refined algorithm gives only one match for "algorithum": "algorithm".
+
+Just as different sounding words may have the same Soundex, the reverse situation can also occur. The codes for words that sound identical - called <i>homophones</i> - may have different codes ("Lee"/"Leigh", "Thomson"/"Thompson", and "Tchaikovsky"/"Chaikovsky"). This may occur because some letters are silent - the "p" in Thompson, or the "gh" in Leigh. Or the initial letter may differ - "Tchaikovsky"/"Chaikovsky", or "Carr"/"Karr" - a problem that the algorithm brings on itself in a sense, since it does not map the initial letter to a phonetic digit. Notice that even if the mapping were performed for the initial letter as for subsequent letters, this would not eliminate the problem as initials for the differently transcribed "Tchaikovsky"/"Chaikovsky" (from [the original]) would still have different values (3 vs. 2).
+
+Interestingly the effect of homophones with different soundexes is worst for an English soundex (which is all we have described here: a soundex for another language would typically differ in the letter mappings and the "intervening h/w" rule) since its orthography[?] is one of the most irregular. Other languges have a much more regular relationship between letters and sounds. For example, Italian has very few silent letters[substantiate].
+
+The slightly odd rule that means "h" and "w" are treated as if they are absent (if not the initial letter) has been a source of implementation difficulty.  The 's' and 'c' in a name such as "Ashcroft" are both represented by the same digit so they combine since they are considered adjacent, yielding "A261" for the Soundex. However many online Soundex calculators don't use this rule, so "Ashcroft" becomes "A226". [Out of a sample of ten ...] [Discuss US censuses]
+
+It is noteworthy that neither of the original patents explicitly mention how "h" and "w" (and "j") are to be treated - although one example ("Kahle", "Kuhl", "Kyle", "Kiele") suggests that "h" is ignored. In my implementation of the original algorithm as descibed by the patents I have kept the "intervening h/j/w rule".
+
+The original Odell/Russell algorithm also made two special case changes to the word. A final 's' or 'z' is discarded since it "is immaterial in the pronunciation of a name", and the letter pair 'gh' is discarded as it is usually silent. These features are not implemented in modern soundex algorithms. It could be argued that there are other special cases that could be dealt with by such rules, for example the silent "b" after "m" in words such as "lamb", "comb", "bomb" could be discarded, however it pays to be systematic in including such rules so an algorithm should either have a carefully selected set or none.
+
+[The balance between having more consonant mappings and less ...]
+
+[Need to look at different versions. Worth mentioning that none is "right". Might be interesting to implement the original.]
+
+In fact, this is the algorithm described by Knuth [ref], many implementations of which can be found on the web. The procedure Russell patented was different in the following aspects. Firstly, it ...
+
+The w/h differences...
+
+The refined Soundex algorithm.
+
+"mnemonic"
+
+----
+
+The Soundex algorithm dates back to (?) when it was devised as a solution to matching people's surnames which are often difficult for operators to enter correctly into a computer (particularly when read over the phone). [More history...]
+
+The algorithm strips all vowels from the word and translates all consonants into a numerical code representing their phonetic group, so for example 'd' and 't' are in the same group since they sound alike. The initial letter of the word is left unchanged. The result is what might be called the "phonetic kernel" of the word, as words with the same code should sound similar.
+
+For example, the word 'algorithm' has the Soundex code 'a426', as does the word 'alacrity' (see box for the details of the algorithm in these cases), however it is clear that these words do not sound particularly similar! Despite this apparent drawback the Soundex algorithm is remarkably widely used and in many cases does offer helpful spelling suggestions[~], particularly when combined with some of the other techniques discussed below to weed out some of the more unsuitable matches.
+
+Conversely the sitution where two words sound alike but have different Soundex codes can also occur [~]. Kunth gives the example of 'Rogers' and 'Rodgers', and 'Tch' and 'Ch'
+
+----
+
+algorithm
+algrtm
+a42635
+a426
+
+alacrity
+alcrt
+a4263
+a426
+
+----

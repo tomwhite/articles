@@ -1,0 +1,28 @@
+    <h4>The Searcher</h4>
+
+    <h4>More</h4>
+
+    <ul>
+      <li>Distributing crawling and searching - 1 para - which parts of the process can be parallelized? MapReduce?</li>
+    </ul>
+
+    <h4>Nutch Components</h4>
+    <h5>WebDB</h5>
+
+    <ul>
+      <li>The WebDB is stored in the <code>db</code> subdirectory. Each map is stored as a <code>org.apache.nutch.io.MapFile</code>, essentially a file-based map of keys (<code>WritableComparable</code>) to values (<code>Writer</code>), stored in increasing key order. A fraction of the keys are kept in memory so the lookup can be done quickly (but saving memory usage - trading off with lookup time - by not storing the whole index in memory).</li>
+      <li>Pages are keyed both by URL and by the MD5 hash of their contents. Similarly, links are keyed by page URL for the target and by MD5 hash for the source page.</li>
+    </ul>
+
+    <h5>Segment</h5>
+
+    <ul>
+      <li>It is possible for a segment to contain multiple fetchlists to enable several machines to do the fetching. (See the options for <code>bin/nutch generate</code>.) However, the <code>bin/nutch crawl</code> command only creates a single fetchlist for each segment since it is designed for crawling a single site (or a small number of sites), s this possibility is not considered further in this article</li>
+      <li>Each segment has a "fetchlist" which is a list of URLs from the WebDB that are due to be fetched. The fetchlist is in a <code>fetchlist</code>  subdirectory, and is compiled by going through all the pages in the Web DB, and adding the URL of every page that meets a set of criteria. For example, pages that have never been fetched before, or haven't been fetched for a given period (defaults to one week). It is possible to restrict the number of URLs added to the fetchlist to the top N by score, but by default all are added.</li>
+    </ul>
+
+    <h5>Index</h5>
+    <ul>
+      <li>The output of crawling is a Lucene index which is used to support the search application. This is the only structure used at search time. (This is not strictly true since if cached pages are being served by Nutch - enabled by default? - then the segments <code>content</code> directories are needed too.)</li>
+    </ul>
+

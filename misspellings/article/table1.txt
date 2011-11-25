@@ -1,0 +1,15 @@
+Table 1
+
+		Knuth	Odell/Russell	Refined Soundex		Notes
+		
+White		W300	W14		W6  			Words that sound distinct may have the same code
+Wood		W300	W14		W6
+Woods		W320	W14		W63 			A final "s" can have an effect on the code
+Lee		L000	L1		L  			Words that sound alike may have different codes (Different spelling(orthography) for a vowel sound)
+Leigh		L200	L1		L4
+Thomson		T525	T1637		T838   			" (Silent letter)
+Thompson	T512	T16237		T8138
+Tchaikovsky	T221	T31323		T3323			" (Different initial letter)
+Chaikovsky	C212	C1323		C323
+Lloyd		L300	L14		L6 			Doubled consonants (with same code) are counted once
+Ashcroft	A261	A3824		A3926  			... even when there is an intervening "h" (or "w")

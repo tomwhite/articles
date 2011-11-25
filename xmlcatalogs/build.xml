@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<project name="build" default="all">
+
+  <!-- Helper tasks -->
+
+  <target name="strip">
+    <replaceregexp file="${file}" match="@.*?@" replace="" flags="g"/>
+  </target>
+
+  <!-- Main targets -->
+
+  <target name="article">
+  	<ant antfile="build_article.xml"/>
+  </target>
+
+  <target name="validate">
+    <xmlvalidate file="article.html">
+      <dtd publicId="-//W3C//DTD XHTML 1.0 Strict//EN"
+       location="dtds/xhtml1-strict.dtd"/>
+    </xmlvalidate>
+  </target>
+
+  <target name="wc">
+    <copy file="article_template.html" tofile="article-wc.html"/>
+    <antcall target="strip">
+      <param name="file" value="article-wc.html"/>
+    </antcall>
+    <style in="article-wc.html" out="article-wc.txt" style="wc.xsl">
+      <xmlcatalog>
+        <dtd publicId="-//W3C//DTD XHTML 1.0 Strict//EN"
+         location="dtds/xhtml1-strict.dtd"/>
+      </xmlcatalog>
+    </style>
+    <exec executable="wc">
+      <arg line="-w article-wc.txt"/>
+    </exec>
+    <delete file="article-wc.html"/>
+    <delete file="article-wc.txt"/>
+  </target>
+
+  <target name="remove_annotations">
+    <copy todir="." overwrite="true">
+      <fileset dir="annotated_src"/>
+    </copy>
+    <replaceregexp match="@.*?@" replace="" flags="g" encoding="UTF8">
+      <fileset file="rss_catalog.xml"/>
+      <fileset dir="documents"/>
+      <fileset dir="src"/>
+    </replaceregexp>
+  </target>
+
+  <target name="compile" depends="remove_annotations">
+    <mkdir dir="classes" />
+    <javac srcdir="src" destdir="classes" classpath="lib/junit.jar;lib/resolver.jar;lib/xmlunit1.0.jar"/>
+  </target>
+
+  <target name="dist" depends="compile">
+    <zip destfile="xmlcatalogs.zip">
+    	<zipfileset dir="." prefix="xmlcatalogs"
+    		includes="README,*catalog.xml,policy,catalog/,classes/,documents/,lib/,src/"
+         	excludes="xmlcatalogs.zip"/>
+       	<zipfileset dir="." includes="test.xml" fullpath="xmlcatalogs/build.xml"/>
+	</zip>         
+  </target>
+
+  <target name="tx" depends="remove_annotations">
+  	<delete file="test.html"/>
+    <xslt style="documents/recipe_with_include.xslt" in="documents/recipe.xml" out="test.html" />
+  </target>
+  
+  <target name="all" depends="article,dist"/>
+
+</project>

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<project name="BuildAwsArticle" default="wc">
+	
+	<target name="wc">
+		<style in="article.html" out="article-wc.txt" style="wc.xsl">
+		</style>
+		<exec executable="wc">
+			<arg line="-w article-wc.txt" />
+		</exec>
+		<delete file="article-wc.txt" />
+	</target>
+	
+	<target name="dist">
+		<zip destfile="hadoop-aws.zip">
+			<zipfileset dir="."
+             includes="src/,lib/,build.xml"
+             prefix="hadoop-aws"/>
+        </zip>
+	
+	</target>
+
+</project>

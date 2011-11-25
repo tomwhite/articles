@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+  <title>Introduction to Nutch, Part 2: Searching</title>
+  <!-- Nutch, Lucene, Java search engines -->
+  <link rel="stylesheet" href="http://today.java.net/css/default_developer.css" />
+
+</head>
+
+<body>
+
+<h2>
+ Introduction to Nutch, Part 2: Searching</h2>
+ <p>by <a href="/pub/au/294">Tom White</a><br />
+ __/__/2005</p>
+
+<p>
+In <a href="http://today.java.net/pub/a/today/2006/01/10/introduction-to-nutch-1.html">Part 1</a> of this two part series on Nutch, the open-source Java search engine, we looked at how to crawl websites. Recall that the Nutch crawler system produces three key data structures:
+</p>
+
+<ol>
+<li>the <i>WebDB</i> containing the web graph of pages and links,</li>
+<li>a set of <i>segments</i> containing the raw data retrieved from the web by the fetchers, and</li>
+<li>the merged <i>index</i> created by indexing and de-duplicating parsed data from the segments.</li>
+</ol>
+
+<p>
+In this article we turn to <i>searching</i>. The Nutch search system uses the index and segments generated during the crawling process to answer users' search queries. We shall see how to get the Nutch search application up and running, and how to customise and extend it for integration into an existing website. We'll also look at how to re-crawl sites to keep your index up-to-date - a requirement of all real world search engines.
+</p>
+
+<h3>Running the search application</h3>
+
+<p>
+Without further ado, let's run a search using the results of the crawl we did last time. Tomcat seems to be the most popular servlet container for running Nutch, so let's assume you have it installed (although there is some <a href="http://wiki.apache.org/nutch/GettingNutchRunningWithResin">guidance</a> on the Nutch wiki for Resin). The first step is to install the Nutch webapp. There are some <a href="http://mail-archives.apache.org/mod_mbox/lucene-nutch-user/200511.mbox/browser">reported problems</a> with running Nutch (version 0.7.1) as a non-root webapp, so it is currently safest to install it as the root webapp. This is what the Nutch tutorial advises. If Tomcat's webapps are in <i>~/tomcat/webapps/</i>, then type the following in the directory where you unpacked Nutch:
+</p>
+
+<pre><code>rm -rf ~/tomcat/webapps/ROOT*
+cp nutch*.war ~/tomcat/webapps/ROOT.war</code></pre>
+
+<p>
+The second step is to ensure that the webapp can find the index and segments that we generated last time. Nutch looks for these in the <i>index</i> and <i>segments</i> subdirectories of the directory defined in the <code>searcher.dir</code> property. The default value for <code>searcher.dir</code> is the current directory (<code>.</code>), which is where you started Tomcat. While this may be convenient during development, often you don't have so much control over the directory in which Tomcat starts up, or you want to be explicit about where the index and segments may be found. Recall from Part 1 that Nutch's configuration files are found in the <i>conf</i> subdirectory of the Nutch distribution. For the webapp these files can be found in <i>WEB-INF/classes/</i>. So we simply create a file called <i>nutch-site.xml</i> in this directory (of the unpacked webapp) and set <code>searcher.dir</code> to be the crawl directory containing the index and segments.
+</p>
+
+<pre><code>&lt;?xml version="1.0"?&gt;
+&lt;?xml-stylesheet type="text/xsl" href="nutch-conf.xsl"?&gt;
+
+&lt;!-- Put site-specific property overrides in this file. --&gt;
+
+&lt;nutch-conf&gt;
+&lt;property&gt;
+&lt;name&gt;searcher.dir&lt;/name&gt;
+&lt;value&gt;/Users/tom/Applications/nutch-0.7.1/crawl-tinysite&lt;/value&gt;
+&lt;/property&gt;
+&lt;/nutch-conf&gt;</code></pre>
+
+<p>
+After restarting Tomcat, enter the URL of the root webapp in your browser (in this example I'm running Tomcat on port 80, but the default is port 8080) and you should see the Nutch home page. Do a search and you will get a page of search results like Figure 1.
+</p>
+
+<p><img src="graphics/Figure-2-1.png" alt="Figure 1" height="418" width="644"/><br/>
+<i>Figure 1. Nutch search results for the query "animals".</i></p>
+
+<p>
+The search results are displayed using the format used by all mainstream search engines these days. The <i>explain</i> and <i>anchors</i> links that are shown for each hit are unusual and deserve further comment.
+</p>
+
+<h4>Score Explanation</h4>
+
+<p>
+Clicking the <i>explain</i> link for the page A hit brings up the page shown in Figure 2. It shows some metadata for the page hit (page A), and a <i>score explanation</i>. The score explanation is a Lucene feature that shows all the factors that contribute to the calculated score for a particular hit. The formula for score calculation is rather <a href="http://lucene.apache.org/java/docs/api/org/apache/lucene/search/Similarity.html">technical</a>, so it is natural to ask why this page is promoted by Nutch when it is clearly unsuitable for the average user.
+</p>
+
+<p>
+One of Nutch's key selling points is its transparency. Its ranking algorithms are open-source so anyone can see them. Nutch's ability to "explain" its rankings online - via the <i>explain</i> link - takes this one step further and allows an (expert) user to see why one particular hit ranked above another for a given search. In practice, this page is only really useful for diagnostic purposes for people running a Nutch search engine, so there is no need to expose it publicly, except perhaps for PR reasons.
+</p>
+
+<p><img src="graphics/Figure-2-2.png" alt="Figure 2" height="581" width="646"/><br/>
+<i>Figure 2. Nutch's score explanation page for page A matching the query "animals".</i></p>
+
+<h4>Anchors</h4>
+
+<p>
+The <i>anchors</i> page (not illustrated here) provides a list of the incoming anchor text for the pages that link to the page of interest. In this case, the link to page A from page B had the anchor text "A". Again, this is a feature for Nutch site maintainers rather than the average user of the site.
+</p>
+
+
+<h3>Integrating Nutch Search</h3>
+
+<p>
+While the Nutch webapp is a great way to get started with search, most projects using Nutch require the search function to be more tightly integrated with their application. There are various ways to achieve this, depending on the application. The two ways we'll look at here are: using the Nutch API, and using the OpenSearch API
+</p>
+
+<h4>Using the Nutch API</h4>
+
+<p>
+If your application is written in Java then it is worth considering using Nutch's API directly to add a search capability. Of course, the Nutch webapp is written using the Nutch API, so you may find it fruitful to use it as a starting point for your application. If you take this approach, the files to take a look at first are the JSPs in <i>src/web/jsp</i> in the Nutch distribution.
+</p>
+
+<p>
+To demonstrate Nutch's API, we'll write a minimal command-line program to perform a search. We'll run the program using Nutch's launcher, so for the search we did above, for the term "animals", we type:
+</p>
+
+<pre><code>bin/nutch org.tiling.nutch.intro.SearchApp animals</code></pre>
+
+<p>
+And the output is as follows.
+</p>
+
+<pre><code>'A' is for Alligator (http://keaton/tinysite/A.html)
+  &lt;b&gt; ... &lt;/b&gt;Alligators' main prey are smaller &lt;b&gt;animals&lt;/b&gt; that they can kill and&lt;b&gt; ... &lt;/b&gt;
+
+'C' is for Cow (http://keaton/tinysite/C.html)
+  &lt;b&gt; ... &lt;/b&gt;leather and as draught &lt;b&gt;animals&lt;/b&gt; (pulling carts, plows and&lt;b&gt; ... &lt;/b&gt;</code></pre>
+
+<p>
+Here's the program that achieves this. To get it to run, the compiled class is packaged in a jar file, which is then placed in Nutch's <i>lib</i> directory. See the <a href="#resources">resources</a> section to obtain the jar file.
+</p>
+
+<pre><code>package org.tiling.nutch.intro;
+
+import java.io.IOException;
+
+import org.apache.nutch.searcher.Hit;
+import org.apache.nutch.searcher.HitDetails;
+import org.apache.nutch.searcher.Hits;
+import org.apache.nutch.searcher.NutchBean;
+import org.apache.nutch.searcher.Query;
+
+public class SearchApp {
+
+  private static final int NUM_HITS = 10;
+
+  public static void main(String[] args)
+      throws IOException {
+
+    if (args.length == 0) {
+      String usage = "Usage: SearchApp query";
+      System.err.println(usage);
+      System.exit(-1);
+    }
+
+    NutchBean bean = new NutchBean();
+    Query query = Query.parse(args[0]);
+    Hits hits = bean.search(query, NUM_HITS);
+
+    for (int i = 0; i &lt; hits.getLength(); i++) {
+      Hit hit = hits.getHit(i);
+      HitDetails details = bean.getDetails(hit);
+
+      String title = details.getValue("title");
+      String url = details.getValue("url");
+      String summary =
+        bean.getSummary(details, query);
+
+      System.out.print(title);
+      System.out.print(" (");
+      System.out.print(url);
+      System.out.println(")");
+      System.out.println("\t" + summary);
+    }
+
+  }
+
+}
+</code></pre>
+
+<p>
+Although it's a short and simple program, Nutch is doing lots of work for us, so we'll examine it in some detail. The central class here is <code>NutchBean</code> - it orchestrates the search for us. Indeed, the <a href="http://lucene.apache.org/nutch/apidocs/org/apache/nutch/searcher/NutchBean.html">doc comment</a> for <code>NutchBean</code> states that it provides "One stop shopping for search-related functionality".
+</p>
+
+<p>
+Upon construction, the <code>NutchBean</code> object opens the index it is searching against in read-only mode, and reads the set of segment names and filesystem locations into memory. The index and segments locations are configured in the same way as they were for the webapp: via the <code>searcher.dir</code> property.
+</p>
+
+<p>
+Before we can perform the search, we parse the query string given as the first parameter on the command line (<code>args[0]</code>) into a Nutch <code>Query</code> object. The <code>Query.parse()</code> method invokes Nutch's specialised parser (<code>org.apache.nutch.analysis.NutchAnalysis</code>) that is generated from a grammar using the JavaCC parser generator. Although Nutch relies heavily on Lucene for its text indexing, analysis and searching capabilities, there are many places where Nutch enhances or provides different implementations of core Lucene functions. This is the case for <code>Query</code>, so be careful not to confuse Lucene's <code>org.apache.lucene.search.Query</code> with Nutch's <code>org.apache.nutch.searcher.Query</code>. The types represent the same concept (a user's query), but they are not type compatible with one another.
+</p>
+
+<p>
+With a <code>Query</code> object in hand we can now ask the bean to do the search for us. It does this by translating the Nutch <code>Query</code> into an optimized Lucene <code>Query</code>, then carrying out a regular Lucene search. Finally a Nutch <code>Hits</code> object is returned, which represents the top matches for the query. This object only contains index and document identifiers. To return useful information about each hit, we go back to the bean to get a <code>HitDetails</code> object for each hit we are interested in, which contains the data from the index. We retrieve only the title and URL fields here, but there are more fields available: the field names may be found using the <code>getField(int i)</code> method of <code>HitDetails</code>.
+</p>
+
+<p>
+The last piece of information that is displayed by the application is a short HTML summary which shows the context of the query terms in each matching document. The summary is constructed by the bean's <code>getSummary()</code> method. The <code>HitDetails</code> argument is used to find the segment and document number for retrieving the document's parsed text, which is then processed to find the first occurrence of any of the terms in the <code>Query</code> argument. Note that the amount of context to show in the summary - that is, the number of terms before and after the matching query terms - and the maximum summary length are both Nutch configuration properties (<code>searcher.summary.context</code> and <code>searcher.summary.length</code>, respectively).
+</p>
+
+<p>
+That's the end of the example, but you may not be surprised to learn that
+<code>NutchBean</code> provides access to more of the data stored in the segments, such as cached content and fetch date. Take a look at the <a href="http://lucene.apache.org/nutch/apidocs/org/apache/nutch/searcher/NutchBean.html">API documentation</a> for more details.
+</p>
+
+<h4>Using the OpenSearch API</h4>
+
+<p>
+<a href="http://opensearch.a9.com/">OpenSearch</a> is an extension of RSS 2.0 for publishing search engine results, and was developed by <a href="http://a9.com">A9.com</a>, the search engine owned by Amazon.com. Nutch supports OpenSearch 1.0 out of the box. The OpenSearch results for the search in Figure 1 can be accessed by clicking on the RSS link in the bottom right-hand corner of the page. This is the XML that is returned:
+</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;rss version="2.0"
+  xmlns:nutch="http://www.nutch.org/opensearchrss/1.0/"
+  xmlns:opensearch="http://a9.com/-/spec/opensearchrss/1.0/"&gt;
+
+  &lt;channel&gt;
+    &lt;title&gt;Nutch: animals&lt;/title&gt;
+    &lt;description&gt;Nutch search results for query: animals&lt;/description&gt;
+    &lt;link&gt;http://localhost/search.jsp?query=animals&amp;amp;start=0&amp;amp;hitsPerDup=2&amp;amp;hitsPerPage=10&lt;/link&gt;
+
+    &lt;opensearch:totalResults&gt;2&lt;/opensearch:totalResults&gt;
+    &lt;opensearch:startIndex&gt;0&lt;/opensearch:startIndex&gt;
+    &lt;opensearch:itemsPerPage&gt;10&lt;/opensearch:itemsPerPage&gt;
+
+    &lt;nutch:query&gt;animals&lt;/nutch:query&gt;
+
+    &lt;item&gt;
+      &lt;title&gt;'A' is for Alligator&lt;/title&gt;
+      &lt;description&gt;&amp;lt;b&amp;gt; ... &amp;lt;/b&amp;gt;Alligators'
+      main prey are smaller &amp;lt;b&amp;gt;animals&amp;lt;/b&amp;gt;
+      that they can kill and&amp;lt;b&amp;gt; ... &amp;lt;/b&amp;gt;&lt;/description&gt;
+      &lt;link&gt;http://keaton/tinysite/A.html&lt;/link&gt;
+
+      &lt;nutch:site&gt;keaton&lt;/nutch:site&gt;
+      &lt;nutch:cache&gt;http://localhost/cached.jsp?idx=0&amp;amp;id=0&lt;/nutch:cache&gt;
+      &lt;nutch:explain&gt;http://localhost/explain.jsp?idx=0&amp;amp;id=0&amp;amp;query=animals&lt;/nutch:explain&gt;
+      &lt;nutch:docNo&gt;0&lt;/nutch:docNo&gt;
+      &lt;nutch:segment&gt;20051025121334&lt;/nutch:segment&gt;
+      &lt;nutch:digest&gt;fb8b9f0792e449cda72a9670b4ce833a&lt;/nutch:digest&gt;
+      &lt;nutch:boost&gt;1.3132616&lt;/nutch:boost&gt;
+    &lt;/item&gt;
+
+    &lt;item&gt;
+      &lt;title&gt;'C' is for Cow&lt;/title&gt;
+      &lt;description&gt;&amp;lt;b&amp;gt; ... &amp;lt;/b&amp;gt;leather
+      and as draught &amp;lt;b&amp;gt;animals&amp;lt;/b&amp;gt;
+      (pulling carts, plows and&amp;lt;b&amp;gt; ... &amp;lt;/b&amp;gt;&lt;/description&gt;
+      &lt;link&gt;http://keaton/tinysite/C.html&lt;/link&gt;
+
+      &lt;nutch:site&gt;keaton&lt;/nutch:site&gt;
+      &lt;nutch:cache&gt;http://localhost/cached.jsp?idx=0&amp;amp;id=2&lt;/nutch:cache&gt;
+      &lt;nutch:explain&gt;http://localhost/explain.jsp?idx=0&amp;amp;id=2&amp;amp;query=animals&lt;/nutch:explain&gt;
+      &lt;nutch:docNo&gt;1&lt;/nutch:docNo&gt;
+      &lt;nutch:segment&gt;20051025121339&lt;/nutch:segment&gt;
+      &lt;nutch:digest&gt;be7e0a5c7ad9d98dd3a518838afd5276&lt;/nutch:digest&gt;
+      &lt;nutch:boost&gt;1.3132616&lt;/nutch:boost&gt;
+    &lt;/item&gt;
+
+  &lt;/channel&gt;
+&lt;/rss&gt;
+</code></pre>
+
+<p>
+This document is an RSS 2.0 document, where each hit is represented by an <code>item</code> element. Notice the two extra namespaces, <code>opensearch</code> and <code>nutch</code>, which allow search-specific data to be included in the RSS document. For example, the <code>opensearch:totalResults</code> element tells you the number of search results available (not just those returned in this page). Nutch too defines its own extensions, allowing consumers of this document to access page metadata, or related resources, such as the cached content of a page via the URL in the <code>nutch:cache</code> element.
+</p>
+
+<p>
+Using OpenSearch to integrate Nutch is a great fit if your front-end application is not written in Java. For example, you could write a PHP front-end to Nutch by writing a PHP search page that calls the OpenSearch servlet then parses the RSS response and displays the results.
+</p>
+
+<h3>Real-World Nutch Search</h3>
+
+<p>
+The examples we have looked at so far have been very simple in order to demonstrate the concepts behind Nutch. In a real Nutch setup other considerations come into play. One of the most frequently asked questions on the Nutch newsgroups concerns keeping the index up-to-date. The rest of this article looks at how to re-crawl pages to keep your search results fresh and relevant.
+</p>
+
+<h4>Re-crawling</h4>
+
+<p>
+Unfortunately, re-crawling is not as simple as re-running the <code>crawl</code> tool that we saw in Part 1. Recall that this tool creates a pristine WebDB each time it is run, and starts compiling lists of URLs to fetch from a small set of seed URLs. A re-crawl starts with the WebDB structure from the previous crawl and constructs the fetchlist from there. This is generally a good idea as most sites have a relatively static URL scheme. It is however possible to filter out the transient portions of a site's URL space that should not be crawled by editing the <i>conf/regex-urlfilter.txt</i> configuration file. Don't be confused by the similarity between <i>conf/crawl-urlfilter.txt</i> and <i>conf/regex-urlfilter.txt</i>: while they both have the same syntax, the former is used only by the <code>crawl</code> tool, and the latter by all other tools.
+</p>
+
+<p>
+The re-crawl amounts to running the generate/fetch/update cycle, followed by index creation.
+To accomplish this we employ the lower-level Nutch tools that the <code>crawl</code> tool delegates to. Here is a simple shell script to do it, with the tool names highlighted:
+</p>
+
+<pre><code>#!/bin/bash
+
+# A simple script to run a Nutch re-crawl
+
+if [ -n "$1" ]
+then
+  crawl_dir=$1
+else
+  echo "Usage: recrawl crawl_dir [depth] [adddays]"
+  exit 1
+fi
+
+if [ -n "$2" ]
+then
+  depth=$2
+else
+  depth=5
+fi
+
+if [ -n "$3" ]
+then
+  adddays=$3
+else
+  adddays=0
+fi
+
+webdb_dir=$crawl_dir/db
+segments_dir=$crawl_dir/segments
+index_dir=$crawl_dir/index
+
+# The generate/fetch/update cycle
+for ((i=1; i &lt;= depth ; i++))
+do
+  bin/nutch <b>generate</b> $webdb_dir $segments_dir -adddays $adddays
+  segment=`ls -d $segments_dir/* | tail -1`
+  bin/nutch <b>fetch</b> $segment
+  bin/nutch <b>updatedb</b> $webdb_dir $segment
+done
+
+# Update segments
+mkdir tmp
+bin/nutch <b>updatesegs</b> $webdb_dir $segments_dir tmp
+rm -R tmp
+
+# Index segments
+for segment in `ls -d $segments_dir/* | tail -$depth`
+do
+  bin/nutch <b>index</b> $segment
+done
+
+# De-duplicate indexes
+# "bogus" argument is ignored but needed due to
+# a bug in the number of args expected
+bin/nutch <b>dedup</b> $segments_dir bogus
+
+# Merge indexes
+ls -d $segments_dir/* | xargs bin/nutch <b>merge</b> $index_dir
+
+</code></pre>
+
+<p>
+To re-crawl the toy site we crawled in Part 1, we would run:
+</p>
+
+<pre><code>./recrawl crawl-tinysite 3</code></pre>
+
+<p>
+The script is practically identical to the <code>crawl</code> tool except it doesn't create a new WebDB or inject it with seed URLs.
+Like <code>crawl</code> the script takes an optional second argument (<i>depth</i>), which controls the number of iterations of the generate/fetch/update cycle to run (default five). Here we have specified a depth of three. This allows us to pick up new links that may have been created since the last crawl.
+</p>
+
+<p>
+The script supports a third argument (<i>adddays</i>), which is useful for forcing pages to be retrieved even if they are not yet due to be re-fetched. The page re-fetch interval in Nutch is controlled by the configuration property <code>db.default.fetch.interval</code>, and defaults to 30 days. The <i>adddays</i> arguments can be used to advance the clock for fetchlist generation (but not for calculating the next fetch time), thereby fetching pages early.
+</p>
+
+<h4>Updating the Live Search Index</h4>
+
+<p>
+Even with the re-crawl script we have a problem with updating the live search index. As mentioned above, the <code>NutchBean</code> class opens the index to search when it is initialized. Since the Nutch webapp caches the <code>NutchBean</code> in the application servlet context, updates to the index will never be picked up as long as the servlet container is running.
+</p>
+
+<p>
+This problem is recognized by the Nutch community, so it will likely be fixed in an upcoming release (Nutch 0.7.1 was the stable release at the time of writing). Until Nutch provides a way to do it, you can work around the problem - possibly the simplest way is to re-load the Nutch webapp after the re-crawl completes. More sophisticated ways of solving the problem are <a href="http://mail-archives.apache.org/mod_mbox/lucene-nutch-user/200601.mbox/browser">discussed</a> on the newsgroups. These typically involve modifying <code>NutchBean</code> and the search JSP to pick up changes to the index.
+</p>
+
+<h3>Conclusion</h3>
+
+<p>
+In this two-article series we introduced Nutch and discovered how to crawl a small collection of websites and run a Nutch search engine using the results of the crawl. We covered the basics of Nutch, but there are many other aspects to explore, such as the numerous <a href="http://wiki.apache.org/nutch/PluginCentral">plugins</a> available to customise your setup, the tools for maintaining the search index (type <code>bin/nutch</code> to get a list), or even whole-web crawling and searching. Possibly the best thing about Nutch though, is its vibrant <a href="http://mail-archives.apache.org/mod_mbox/lucene-nutch-user/">user</a> and <a href="http://mail-archives.apache.org/mod_mbox/lucene-nutch-dev/">developer</a> community, which is continually coming up with new ideas and ways to do all things search-related.
+</p>
+
+<h3><a name="resources">Resources</a></h3>
+<ul>
+  <li><a href="nutch-intro.zip">Download</a> the code supporting this article.</li>
+  <li><a href="http://today.java.net/pub/a/today/2006/01/10/introduction-to-nutch-1.html">Part 1</a> of this series covers the Nutch crawler system. It also lists a number of useful <a href="http://today.java.net/pub/a/today/2006/01/10/introduction-to-nutch-1.html#resources">resources</a>.</li>
+</ul>
+
+<h3>Dedication</h3>
+
+<p>
+This article is for my elder daughter Emilia.
+</p>
+
+</body>
+</html>

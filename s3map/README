@@ -1,0 +1,14 @@
+S3Map is an implementation of java.util.Map (built on the Amazon S3 Library for REST
+in Java) that uses Amazon S3 as its backing store.
+
+Please see the javadoc in the distribution, or at
+http://s3.amazonaws.com/s3map/javadoc/org/tiling/s3map/S3Map.html
+or more details.
+
+TODO
+
+Possible future enhancements.
+
+ * Make S3Map fail-fast.
+ * Enhance S3Map to implement SortedMap.
+ * Add logging for HTTP traffic.

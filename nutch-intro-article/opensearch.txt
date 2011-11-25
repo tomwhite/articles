@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:nutch="http://www.nutch.org/opensearchrss/1.0/"
+  xmlns:opensearch="http://a9.com/-/spec/opensearchrss/1.0/">
+  
+  <channel>
+    <title>Nutch: animals</title>
+    <description>Nutch search results for query: animals</description>
+    <link>http://localhost/search.jsp?query=animals&amp;start=0&amp;hitsPerDup=2&amp;hitsPerPage=10</link>
+    
+    <opensearch:totalResults>2</opensearch:totalResults>
+    <opensearch:startIndex>0</opensearch:startIndex>
+    <opensearch:itemsPerPage>10</opensearch:itemsPerPage>
+    
+    <nutch:query>animals</nutch:query>
+    
+    <item>
+      <title>'A' is for Alligator</title>
+      <description>&lt;b&gt; ... &lt;/b&gt;Alligators' 
+      main prey are smaller &lt;b&gt;animals&lt;/b&gt; 
+      that they can kill and&lt;b&gt; ... &lt;/b&gt;</description>
+      <link>http://keaton/tinysite/A.html</link>
+      
+      <nutch:site>keaton</nutch:site>
+      <nutch:cache>http://localhost/cached.jsp?idx=0&amp;id=0</nutch:cache>
+      <nutch:explain>http://localhost/explain.jsp?idx=0&amp;id=0&amp;query=animals</nutch:explain>
+      <nutch:docNo>0</nutch:docNo>
+      <nutch:segment>20051025121334</nutch:segment>
+      <nutch:digest>fb8b9f0792e449cda72a9670b4ce833a</nutch:digest>
+      <nutch:boost>1.3132616</nutch:boost>
+    </item>
+    
+    <item>
+      <title>'C' is for Cow</title>
+      <description>&lt;b&gt; ... &lt;/b&gt;leather 
+      and as draught &lt;b&gt;animals&lt;/b&gt; 
+      (pulling carts, plows and&lt;b&gt; ... &lt;/b&gt;</description>
+      <link>http://keaton/tinysite/C.html</link>
+      
+      <nutch:site>keaton</nutch:site>
+      <nutch:cache>http://localhost/cached.jsp?idx=0&amp;id=2</nutch:cache>
+      <nutch:explain>http://localhost/explain.jsp?idx=0&amp;id=2&amp;query=animals</nutch:explain>
+      <nutch:docNo>1</nutch:docNo>
+      <nutch:segment>20051025121339</nutch:segment>
+      <nutch:digest>be7e0a5c7ad9d98dd3a518838afd5276</nutch:digest>
+      <nutch:boost>1.3132616</nutch:boost>
+    </item>
+    
+  </channel>
+</rss>

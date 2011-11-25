@@ -1,0 +1,9 @@
+Testsuite: example4.PerformanceTest
+Tests run: 2, Failures: 0, Errors: 0, Time elapsed: 9.955 sec
+
+------------- Standard Output ---------------
+Memoized. n = -1, loops = 1000: 380ms
+Not memoized. n = -1, loops = 1000: 201ms
+Memoized. n = -1000, loops = 1000: 340ms
+Not memoized. n = -1000, loops = 1000: 8553ms
+------------- ---------------- ---------------

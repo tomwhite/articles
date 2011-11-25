@@ -1,0 +1,177 @@
+<?xml-stylesheet type="text/xsl" href="C:\developerWorks\Local copies\files\3.0\dw-document-html-3.0.xsl"?>
+
+<!-- Authors, please update the line above with the location of the dw-document-html-3.0.xsl file you downloaded to your machine, and update the line below with the location of the dw-document-3.0.xsd file you downloaded to your machine. developerWorks editors may delete the line above. -->
+
+<dw-document xmlns:dw="http://www.ibm.com/developerWorks/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://dw.raleigh.ibm.com/developerworks/library/schema/3.0/dw-document-3.0.xsd">
+
+<!-- 03/10/2004  ARTICLE TEMPLATE LAST UPDATED BY GRETCHEN MOORE -->
+
+<!-- DW-ARTICLE
+Required.  If ratings=auto or yes, the stylesheet generates the appropriate content ratings form (based on the primary zone). Level indicates the skill level (1-5). Localsite indicates which dW site this resides on. -->
+<dw-article toc="auto" ratings="auto" level="1" localsite="worldwide" related_contents="auto">
+<id domino-uid="" content-id=""/>
+
+<!-- META DATA 
+Recommended.  Enter unique keywords for this article. For last update, enter the date and your initials. -->
+<meta name="keywords" content="unique keywords for your article, separated by commas"/>
+<meta name="Last update" content="2004mmdd your-initials"/>
+  
+<!-- CONTENT-AREA
+Required.  Specify the content-area (in previous stylesheet versions, this element was named "zone"). If unsure, leave "none". For multiple content-areas, copy the line below; the line with the primary content area should be first. --> 
+<content-area name="none"/>
+   
+<!-- TITLE
+Title is required, seriestitle is optional, and subtitle is optional but recommended.  Fill in the seriestitle if this article belongs to a column or a series of articles. -->
+<seriestitle>Series title</seriestitle>
+<title>Article title</title>
+<subtitle>Subtitle</subtitle>
+  
+<!-- FORUMURL
+Optional. -->
+<forumurl url=""/>
+  
+<!-- DOWNLOAD-FEATURE
+Optional. In previous stylesheet versions, this element was named "zip." For tech zones, specify url-ftp;  for WebSphere and DB2 content, you can code more than one download-feature element and use both url-ftp and url-http attributes. -->
+<download-feature downloadtype="code" filename="" url-ftp=""/>
+
+<!-- PDF
+Optional. The developerWorks staff will generate and link to the PDF as needed. -->
+<pdf url="" size="xx KB"/>
+   
+<!-- AUTHOR
+Required.  Create an author tag for each author. Provide author's company name, e-mail address, job title, name, and brief biography. Bio should convey relevant expertise or qualifications to write this article. You must specify either a jobtitle or company (or both) for each author element.  Use email_cc to specify an e-mail address (such as the zone editor's) that should be copied on any e-mails that readers send to the author. -->
+<author jobtitle="Author job title" email_cc="Copy email address" email="Author email address" company="Author company">
+  <bio>Author bio goes here.</bio>
+  <img src="photo.jpg" width="64" height="80" alt="Author photo"/>
+  <name>Author name</name>
+</author>
+  
+<!-- DATE
+Required; numeric values only, with leading zeros on the day only; month and year are required attributes; day is optional. -->
+ <date day="09" month="3" year="2004"/>
+   
+<!-- DATE-UPDATED
+Required if article content has been updated since a previous publication;  numeric values only, with leading zeros on the day only. --> 
+ <date-updated day="10" month="3" year="2004"/> 
+
+<!-- ABSTRACT
+Required.  In previous stylesheet versions, this element was named "miniabstract."  This element does not allow HTML tagging, carriage returns, or special characters.  Must be succinct; this content shows up in e-mail to a friend and search results. Avoid line breaks in the abstract, please. If abstract-extended is null or omitted, this abstract text also shows up in the article itself. -->
+ <abstract>Your article abstract goes here. Summarize the main points of the article or the task the developer will be able to do after reading the article. Put the primary points and key phrases close to the beginning of the abstract, because it may be truncated in search results. Avoid line breaks in the abstract, please.</abstract>
+ 
+<!-- ABSTRACT-EXTENDED
+Optional.  In previous stylesheet versions, this element was named "abstract."  Use this element if you want to use HTML tagging or special characters in the abstract that appears in the article itself, or if you want the article abstract to be longer. Avoid line breaks in the abstract-extended, please.-->
+  <abstract-extended>Your article abstract goes here. Summarize the main points of the article or the task the developer will be able to do after reading the article. Put the primary points and key phrases close to the beginning of the abstract, because it may be truncated in search results. You may include HTML tagging or special characters, such as the trademark symbols for IBM<reg /> and Java<trade />.</abstract-extended>
+
+<!-- COLUMN-INFO
+Optional.  Used only for series. -->
+<column-info col-name="series name" col-icon="column_icon.gif"/>
+
+<!-- START OF ARTICLE BODY
+The body can contain paragraphs of text, major headings, minor headings, code listings, figures, tables, sidebars, etc. -->
+<docbody>
+
+  <!-- MAJOR HEADING 
+Major headings should appear in the table of contents (toc) that is automatically generated. If you need to refer to this heading, fill in a refname; otherwise, leave refname blank. -->
+    <heading refname="" type="major" toc="yes">Major heading</heading>
+    <p>Introductory paragraph.</p>
+      
+  <!-- MINOR HEADING 
+Minor headings break major sections into smaller units, and generally do not appear in the table of contents (toc). If you need to refer to this heading, fill in a refname; otherwise, leave refname blank. -->  
+    <heading refname="" type="minor" toc="no">Minor heading</heading>
+    <p>Text following minor heading.</p>
+      
+  <!-- CODE SECTION
+You can include code listings at any point in the article.  Do not exceed the maximum width for code listings: 600 pixels or about 90 characters. For longer code lines, please find suitable places to split the lines; long lines do not autowrap. Include a caption ("heading") for each code listing. 
+
+Type or paste ASCII code into this file, with proper keyboard spacing.  Use the space key to indent lines. Use  &lt; to represent a less-than symbol and &gt; to represent a greater-than symbol.  Use &amp; for any use of ampersand.  If needed for clarity, use the bold tag for bold text (colored text is not advised), as shown below. 
+
+Do not place paragraph tags around the code section. -->
+<heading refname="" type="code" toc="no">Listing 1. Seven methods to create a connection</heading>
+<code type="section">
+Connector  (public class Connector)
+   public static Connection open(String name)
+   public static Connection open(String name)
+   public static Connection open(String name, int mode, boolean timeouts)
+   public static DataInputStream openDataInputStream(String name)
+   public static DataOutputStream openDataOutputStream(String name)
+   <b>public static InputStream openInputStream(String name)</b>
+   public static OutputStream openOutputStream(String name)</code>
+
+  <!-- INLINE CODE (code within text) -->
+<p>Here is a sentence that mentions a socket subroutine, <code type="inline">socket_setup()</code>, which returns a socket that is ready to accept connections.</p>
+
+<!-- FIGURE 
+Figures can appear anywhere in the body of the article.  Do not use paragraph tags around the figure.  The order of the tags is: figure, heading, img, as shown here. Figures should be in gif or jpg format, and no wider than 600 pixels. -->
+    <figure>
+      <heading refname="" type="figure" toc="no" name="" alttoc="">Figure 1. Sample display screen</heading>
+      <img src="template-figure1.jpg" width="247" height="306" alt="Sample display screen"/>
+    </figure>
+    
+  <!-- TABLE-->
+<heading refname="table1" type="minor" toc="no">Table 1. Selected control point functions required of B2B gateways</heading>
+<p>
+      <table width="70%" cellspacing="0" cellpadding="3" border="1">
+        <tr valign="top">
+          <td>
+            <b>Management functions</b>
+          </td>
+          <td>
+            <b>Operational functions</b>
+          </td>
+        </tr>
+        <tr valign="top">
+          <td>
+            <ul>
+              <li>Partner profile management</li>
+              <li>Partner agreement management</li>
+              <li>Non-repudiation</li>
+              <li>Reporting</li>
+            </ul>
+          </td>
+          <td>
+            <ul>
+              <li>Usage monitoring</li>
+              <li>Security functions</li>
+              <li>Flow control</li>
+            </ul>
+          </td>
+        </tr>
+      </table>
+</p>
+          
+  <!-- SIDEBAR -->
+<sidebar>
+<heading refname="" type="sidebar" toc="no">When to use sidebars</heading>
+<p>Use a sidebar for content detours or reinforcement.</p>
+</sidebar>      
+      
+<!-- END ARTICLE BODY -->
+</docbody>
+
+<!-- RELATEDLIST
+Optional. The related list includes 2 or 3 selected links to dW content that is especially relevant to the article.  All resources listed here should also be in the resource list.  -->
+<relatedlist>
+    <a href="http://">Related article title</a>
+    <a href="http://">Related article title</a>
+</relatedlist>
+    
+<!-- RESOURCELIST
+Optional. The resource list includes links to downloadable code for the article, to all resources mentioned in the article, and to other resources, such as Web sites, related to the topic.  Resources may be from IBM, developerWorks, alphaWorks, IBM product sites, or non-IBM sites. Annotate each link by explaining the value and relevance for the reader. Put article titles in quotes, book titles in italics.  -->
+<resourcelist>
+    <ul>
+    <!-- Example of source code link: -->
+    <li>Download the <a href="">source code</a> used in this article.</li>
+    
+    <!-- Example of a Web site resource: -->
+    <li><a href="http://www.tldp.org/">The Linux Documentation Project</a> is a repository of Linux documentation including documents about individual software, HOWTO documents, FAQs, and more.</li>   
+    
+    <!-- Example of an article resource: -->
+    <li>"<a href="http://www-106.ibm.com/developerworks/linux/library/j-layout/">Build a better GUI</a>" (<i>developerWorks</i>, October 2001) discusses the use of Java layout managers for better overall GUI design.</li>
+
+    <!-- Example of a book resource: -->
+    <li><a href="http://www.oreilly.com/catalog/puis/"><i>Practical UNIX &amp; Internet Security</i></a> (O'Reilly &amp; Associates; 1996), by Garfinkel and Spafford, is an excellent reference on all aspects of system security from user management to drafting a security policy.</li>
+    </ul>
+  </resourcelist>
+  
+</dw-article>
+</dw-document>

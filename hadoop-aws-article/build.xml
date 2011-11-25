@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<project name="hadoop-aws" default="jar">
+
+  <property name="src.dir" value="${basedir}/src/main/java"/>
+  <property name="lib.dir" value="${basedir}/lib"/>
+
+  <property name="build.dir" value="${basedir}/build"/>
+  <property name="build.classes" value="${build.dir}/classes"/>
+	
+  <path id="classpath">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+	
+  <target name="init">
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${build.classes}"/>
+  </target>
+	
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <javac 
+     srcdir="${src.dir}"
+     destdir="${build.classes}">
+      <classpath refid="classpath"/>
+    </javac>    
+
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar jarfile="${build.dir}/aws-job.jar">
+      <fileset dir="${build.classes}"/>
+      <fileset dir="${basedir}" includes="lib/" excludes="**/hadoop*.jar"/>
+      <manifest>
+        <attribute name="Main-Class" 
+                   value="org/tiling/hadoop_aws_article/AccessLogFileAnalyzer"/>
+      </manifest>
+    </jar>
+  </target>
+	
+</project>

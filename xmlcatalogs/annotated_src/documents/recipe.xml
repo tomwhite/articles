@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<recipe
+  xmlns="http://tiling.org/xmlcatalogs/namespaces/recipe"
+  @open_bold@xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"@close_bold@
+  @open_bold@xsi:schemaLocation=
+    "http://tiling.org/xmlcatalogs/namespaces/recipe
+    http://tiling.org/xmlcatalogs/schemas/recipe.xsd"@close_bold@>
+
+  <author>Elizabeth David</author>
+  <name>Omelette</name>
+  <ingredient>3-4 eggs</ingredient>
+  <ingredient>1/2 oz. butter</ingredient>
+  <ingredient>Salt and pepper</ingredient>
+  <method>Beat the eggs...</method>
+</recipe>

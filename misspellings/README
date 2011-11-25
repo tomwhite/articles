@@ -1,0 +1,11 @@
+Code and tests accompanying "Spell check algorithms in Java", developerWorks
+----------------------------------------------------------------------------
+
+This distribution contains the full source code (and more) to support the article.
+All source may be used as is - no licence is required, however an acknowledgment
+and link to the article would be appreciated.
+
+To run the tests using the supplied Ant build file simply type:
+
+ant
+

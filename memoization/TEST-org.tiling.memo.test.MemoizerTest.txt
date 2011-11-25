@@ -1,0 +1,3 @@
+Testsuite: org.tiling.memo.test.MemoizerTest
+Tests run: 6, Failures: 0, Errors: 0, Time elapsed: 0.891 sec
+

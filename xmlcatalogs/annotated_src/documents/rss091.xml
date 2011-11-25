@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE rss @open_bold@SYSTEM "http://www.bbc.co.uk/syndication/feeds/news/rss-0.91.dtd"@close_bold@>
+<rss version="0.91"><channel>
+<title>BBC News | News Front Page | UK Edition</title>
+@ellipsis_start@
+	<link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/default.stm</link>
+	<description>Updated every minute of every day</description>
+	<language>en-gb</language>
+	<lastBuildDate>Tue, 09 Dec 03 13:07:47 GMT</lastBuildDate>
+	<copyright>Copyright: (C) British Broadcasting Corporation, http://news.bbc.co.uk/2/shared/bsp/hi/services/copyright/html/default.stm</copyright>
+	<docs>http://www.bbc.co.uk/syndication/</docs>
+		
+		<image>
+			<title>BBC News</title>
+			<url>http://news.bbc.co.uk/nol/shared/img/bbc_news_120x60.gif</url>
+			<link>http://news.bbc.co.uk</link>
+		</image>
+		
+			<item>
+        <title>Landmark toll motorway opens</title>
+        <description>The UK's road network reaches a watershed with the opening of the country's first toll motorway.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/england/staffordshire/3298789.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Five die in Moscow suicide blast</title>
+        <description>At least five people are killed in an explosion in Moscow, which is being described as a botched suicide bombing.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/world/europe/3302765.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Osbourne hurt in quad bike smash</title>
+        <description>Rock singer Ozzy Osbourne is in a comfortable condition in hospital after a quad bike crash.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/entertainment/showbiz/3302405.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Iraq car bomb wounds 41 troops</title>
+        <description>Forty-one American soldiers are injured in northern Iraq in a car bomb attack at a US army base.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/world/middle_east/3302629.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Blair criticises Zimbabwe 'chaos'</title>
+        <description>Tony Blair is updating MPs on the talks which prompted Zimbabwe to pull out of the Commonwealth.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/uk_politics/3303253.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Property tycoon cleared by court</title>
+        <description>Property baron Nicholas van Hoogstraten is formally cleared at the Old Bailey of killing a business rival.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/uk/3303315.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Drive to increase patient choice</title>
+        <description>More powers for pharmacists and fast track diagnostic centres are among measures to increase patient choice in the NHS.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/health/3300949.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Call for long-term mortgages</title>
+        <description>UK home buyers are unaware of the benefits of long-term fixed-rate mortgages, a Treasury review of the housing market finds.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/business/3302029.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Humans 'could survive Mars visit'</title>
+        <description>Measurements taken by Nasa's Mars Odyssey craft suggest humans could survive a mission to Mars' surface.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/sci/tech/3302375.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Rugby: No rest for heroes</title>
+        <description>England's Rugby World Cup winners have little time to rest following Monday's victory parade.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/sport1/hi/rugby_union/3302915.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Football: Euro preview</title>
+        <description>Chelsea and Man Utd look to secure top spot in their groups - plus a look ahead to all Tuesday's games.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/sport1/hi/football/champions_league/3300601.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Chiluba on trial for corruption</title>
+        <description>Zambia's former President Frederick Chiluba, goes on trial for the alleged theft of more than $40m.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/world/africa/3302751.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Japan backs Iraq troops dispatch</title>
+        <description>Japan agrees a controversial plan to send non-combat troops to Iraq, its biggest deployment since WWII.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/world/asia-pacific/3301093.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Gore 'to back Dean for Democrats'</title>
+        <description>The former vice president is to endorse Howard Dean as the US Democrats' best choice to run in 2004.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/world/americas/3302595.stm</link>
+	
+</item>
+       		
+			<item>
+        <title>Key ETA suspect is held in France</title>
+        <description>A suspected military leader of the Basque separatist group ETA is arrested in France.</description>
+        <link>http://news.bbc.co.uk/go/click/rss/0.91/public/-/1/hi/world/europe/3302941.stm</link>
+	
+</item>
+       		
+
+	
+@ellipsis_end@	
+</channel>
+</rss>

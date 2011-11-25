@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<project name="article" default="article">
+
+  <!-- Helper tasks -->
+
+  <target name="tag">
+    <replaceregexp file="${file}" match="@&lt;(.*?)&gt;@" replace="&lt;\1&gt;" flags="g"/>
+    <replaceregexp file="${file}" match="@&lt;/(.*?)&gt;@" replace="&lt;/\1&gt;" flags="g"/>
+  </target>
+
+  <target name="tab4">
+    <replaceregexp file="${file}" match="\t" replace="    " flags="g"/>
+  </target>
+
+  <target name="tab2">
+    <replaceregexp file="${file}" match="\t" replace="  " flags="g"/>
+  </target>
+
+  <target name="bold">
+    <replaceregexp file="${file}" match="@open_bold@" replace="&lt;b&gt;" flags="g"/>
+    <replaceregexp file="${file}" match="@close_bold@" replace="&lt;/b&gt;" flags="g"/>
+  </target>
+
+  <target name="snip">
+    <replaceregexp file="${file}" match="@snip_start@.*?@snip_end@" replace="" flags="gs"/>
+  </target>
+
+  <target name="ellipsis">
+    <replaceregexp file="${file}" match="@ellipsis_start@.*?@ellipsis_end@" replace="&lt;b&gt;...&lt;/b&gt;" flags="gs"/>
+  </target>
+
+  <target name="escape">
+    <replaceregexp file="${file}" match="&amp;" replace="&amp;amp;" flags="g"/>
+    <replaceregexp file="${file}" match="&lt;" replace="&amp;lt;" flags="g"/>
+    <replaceregexp file="${file}" match="&gt;" replace="&amp;gt;" flags="g"/>
+    <replaceregexp file="${file}" match="&quot;" replace="&amp;quot;" flags="g"/>
+    <replaceregexp file="${file}" match="&apos;" replace="&amp;apos;" flags="g"/>
+  </target>
+  
+  <target name="java">
+    <antcall target="tab4">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="snip">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="ellipsis">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="bold">
+      <param name="file" value="build/${file}"/>
+    </antcall>       
+    <loadfile property="${file}"
+      srcFile="build/${file}"/>  
+  </target> 
+  
+  <target name="xml">
+    <antcall target="tab2">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="escape">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="snip">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="ellipsis">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="bold">
+      <param name="file" value="build/${file}"/>
+    </antcall>    
+    <loadfile property="${file}"
+      srcFile="build/${file}"/>  
+  </target>
+
+  <!-- Main targets -->
+
+  <target name="article">
+    <mkdir dir="build"/>
+    <copy todir="build">
+      <fileset dir="annotated_src"/>
+      <!--fileset dir=".">
+        <include name="src/"/>
+      </fileset-->
+    </copy>
+
+    <antcall target="xml">
+      <param name="file" value="documents/recipe.html"/>
+    </antcall>
+    <loadfile property="documents/recipe.html"
+      srcFile="build/documents/recipe.html"/>
+
+    <antcall target="java">
+      <param name="file" value="src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingSaxParser.java"/>
+    </antcall>
+    <loadfile property="src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingSaxParser.java"
+      srcFile="build/src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingSaxParser.java"/>
+
+    <antcall target="java">
+      <param name="file" value="src/org/tiling/xmlcatalog/parsers/DefaultErrorHandler.java"/>
+    </antcall>
+    <loadfile property="src/org/tiling/xmlcatalog/parsers/DefaultErrorHandler.java"
+      srcFile="build/src/org/tiling/xmlcatalog/parsers/DefaultErrorHandler.java"/>
+
+    <antcall target="xml">
+      <param name="file" value="catalog.xml"/>
+    </antcall>
+    <loadfile property="catalog.xml"
+      srcFile="build/catalog.xml"/>
+
+    <antcall target="java">
+      <param name="file" value="src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingWithCatalogSaxParser.java"/>
+    </antcall>
+    <loadfile property="src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingWithCatalogSaxParser.java"
+      srcFile="build/src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingWithCatalogSaxParser.java"/>
+      
+    <antcall target="xml">
+      <param name="file" value="documents/rss091.xml"/>
+    </antcall>
+    <loadfile property="documents/rss091.xml"
+      srcFile="build/documents/rss091.xml"/>
+      
+    <antcall target="xml">
+      <param name="file" value="rss_catalog.xml"/>
+    </antcall>
+    <loadfile property="rss_catalog.xml"
+      srcFile="build/rss_catalog.xml"/>
+      
+    <antcall target="xml">
+      <param name="file" value="documents/recipe.xml"/>
+    </antcall>
+    <loadfile property="documents/recipe.xml"
+      srcFile="build/documents/recipe.xml"/>
+
+    <antcall target="xml">
+      <param name="file" value="schema_catalog.xml"/>
+    </antcall>
+    <loadfile property="schema_catalog.xml"
+      srcFile="build/schema_catalog.xml"/>
+
+    <antcall target="java">
+      <param name="file" value="src/org/tiling/xmlcatalog/parsers/sax/SchemaValidatingWithCatalogSaxParser.java"/>
+    </antcall>
+    <loadfile property="src/org/tiling/xmlcatalog/parsers/sax/SchemaValidatingWithCatalogSaxParser.java"
+      srcFile="build/src/org/tiling/xmlcatalog/parsers/sax/SchemaValidatingWithCatalogSaxParser.java"/>
+
+    <antcall target="xml">
+      <param name="file" value="documents/recipe_with_include.xslt"/>
+    </antcall>
+    <loadfile property="documents/recipe_with_include.xslt"
+      srcFile="build/documents/recipe_with_include.xslt"/>
+
+    <antcall target="xml">
+      <param name="file" value="xslt_catalog.xml"/>
+    </antcall>
+    <loadfile property="xslt_catalog.xml"
+      srcFile="build/xslt_catalog.xml"/>
+
+    <antcall target="java">
+      <param name="file" value="src/org/tiling/xmlcatalog/transform/WithCatalogXsltTransformer.java"/>
+    </antcall>
+    <loadfile property="src/org/tiling/xmlcatalog/transform/WithCatalogXsltTransformer.java"
+      srcFile="build/src/org/tiling/xmlcatalog/transform/WithCatalogXsltTransformer.java"/>
+
+    <antcall target="xml">
+      <param name="file" value="rewrite_catalog.xml"/>
+    </antcall>
+    <loadfile property="rewrite_catalog.xml"
+      srcFile="build/rewrite_catalog.xml"/>
+
+    <delete file="article.html"/>
+    <copy file="article_template.html" tofile="article.html">
+      <filterset>
+        <filter token="documents/recipe.html"
+          value="${documents/recipe.html}"/>
+        <filter token="src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingSaxParser.java"
+          value="${src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingSaxParser.java}"/>
+        <filter token="src/org/tiling/xmlcatalog/parsers/DefaultErrorHandler.java"
+          value="${src/org/tiling/xmlcatalog/parsers/DefaultErrorHandler.java}"/>
+        <filter token="catalog.xml"
+          value="${catalog.xml}"/>
+        <filter token="src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingWithCatalogSaxParser.java"
+          value="${src/org/tiling/xmlcatalog/parsers/sax/DtdValidatingWithCatalogSaxParser.java}"/>
+        <filter token="documents/rss091.xml"
+          value="${documents/rss091.xml}"/>
+        <filter token="rss_catalog.xml"
+          value="${rss_catalog.xml}"/>
+        <filter token="documents/recipe.xml"
+          value="${documents/recipe.xml}"/>
+        <filter token="schema_catalog.xml"
+          value="${schema_catalog.xml}"/>
+        <filter token="src/org/tiling/xmlcatalog/parsers/sax/SchemaValidatingWithCatalogSaxParser.java"
+          value="${src/org/tiling/xmlcatalog/parsers/sax/SchemaValidatingWithCatalogSaxParser.java}"/>
+        <filter token="documents/recipe_with_include.xslt"
+          value="${documents/recipe_with_include.xslt}"/>
+        <filter token="xslt_catalog.xml"
+          value="${xslt_catalog.xml}"/>
+        <filter token="src/org/tiling/xmlcatalog/transform/WithCatalogXsltTransformer.java"
+          value="${src/org/tiling/xmlcatalog/transform/WithCatalogXsltTransformer.java}"/>
+        <filter token="rewrite_catalog.xml"
+          value="${rewrite_catalog.xml}"/>
+      </filterset>
+    </copy>
+    <delete dir="build"/>
+  </target>
+
+</project>

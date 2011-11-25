@@ -1,0 +1,7 @@
+Testsuite: example5.PerformanceTest
+Tests run: 2, Failures: 0, Errors: 0, Time elapsed: 3.164 sec
+
+------------- Standard Output ---------------
+100000 loops: 1.943s
+100000 loops: 1.221s
+------------- ---------------- ---------------

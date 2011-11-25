@@ -1,0 +1,532 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Running Hadoop MapReduce on Amazon EC2 and S3</title>
+<link rel="stylesheet" type="text/css" href="aws-dev-content.css"/>
+</head>
+<body>
+<h1>Running Hadoop MapReduce on Amazon EC2 and S3</h1>
+
+<p>
+Managing large datasets is hard; running computations on large datasets is even harder. Once a dataset has exceeded the capacity of a single filesystem or a single machine, running data processing tasks requires specialist hardware and applications, or, if attempted on a network of commodity machines, it requires a lot of manual work to manage the process: splitting the dataset into manageable chunks, launching jobs, handling failures, and combining job output into a final result.
+</p>
+
+<p>
+Apache's Hadoop project aims to solve these problems by providing a framework for running large data processing applications on clusters of commodity hardware. Combined with Amazon EC2 for running the application, and Amazon S3 for storing the data, we can run large jobs very economically. This paper describes how to use Amazon Web Services and Hadoop to run an <i>ad hoc</i> analysis on a large collection of web access logs that otherwise would have cost a prohibitive amount in either time or money.
+</p>
+
+<h2>Hadoop MapReduce</h2>
+
+<p>
+<a href="http://lucene.apache.org/hadoop/">Apache Hadoop</a>, a sub-project of the well-known Lucene text search library, provides several components for building distributed applications. For this article we shall focus on the MapReduce component, which provides a simple but powerful programming model for writing parallel programs by defining how the processing can be split into small fragments of work.
+</p>
+<p>
+The MapReduce concept (and name) comes from Google, which is described in an excellent <a href="http://labs.google.com/papers/mapreduce.html">paper</a> by Jeffrey Dean and Sanjay Ghemawat, which is well worth reading. Google's MapReduce implementation, while extensively used inside the company, is obviously not available for general use. A goal of the Hadoop project is to provide an open source implementation of MapReduce that anyone can run on their own cluster, or on rented hardware, such as an Amazon EC2 cluster. While the Hadoop implementation is similar to that described in the Dean and Ghemawat paper, it is worth noting that there are differences in design and nomenclature.
+</p>
+
+<h2>Writing a MapReduce Program</h2>
+
+<p>
+For our example we are going to write a program that takes web server access log files (as produced by an Apache Web Server, for example) and counts the number of hits in each minute slot over a week. We will analyze months of logs and plot the distribution in order to get a view of how traffic volumes tend to vary over the course of a week.
+The beauty of this approach is that the same program will scale to months or years of massive logs, simply by increasing the cluster size.
+</p>
+
+<p>
+The best way to think about MapReduce programs is to think about the input and output of each phase: the Map phase and the Reduce phase. Each phase has key-value pairs as input, and key-value pairs as output. The types and number of records of the input and output may be different, although the Map output types must be the same as the Reduce input types. Let's see how to choose the types for our MapReduce program
+</p>
+
+<p>
+The input to the Map phase is the access log files, and we use an input format that gives us key-value pairs which are the character offset within the access log (which we ignore) and the corresponding line.
+Our Map function takes a log line, pulls out the timestamp field for when the server finished processing the request, converts it into a minute-in-week slot, then writes out a <em>(&lt;minute-in-week slot&gt;, &lt;1&gt;)</em> key-value pair. We are mapping each line in the access log to its minute-in-week slot.
+</p>
+<p>
+The Reduce is given <em>&lt;minute-in-week slot&gt;</em> keys and an iterator over all the values for the key that were produced by the maps. So all we have to do is sum the values as we iterate over them, in order to produce a final output which are <em>(&lt;minute-in-week slot&gt;, &lt;total hits&gt;)</em> key-value pairs. Hadoop's MapReduce infrastructure is actually doing a lot behind the scenes to make this work, and to make it reliable in the face of hardware failure. It even sorts the output of the Reduce phase by key, so we have exactly what we need to plot our graph. (We won't use Hadoop to plot our graph for us, but more of that later.)
+</p>
+
+<p>
+To illustrate the way this all works, take the following three-line access log: 
+</p>
+
+<pre>
+192.168.0.5 - - [22/Aug/2005:22:07:52 +0000] "GET / HTTP/1.1" 200 1722
+192.168.0.5 - - [22/Aug/2005:22:07:52 +0000] "GET /styles/layout.css HTTP/1.1" 200 2187
+192.168.0.5 - - [22/Aug/2005:22:08:00 +0000] "GET /projects.html HTTP/1.1" 200 4024
+</pre>
+
+<p>
+Our Map takes each input line and produces the following output (note 22:07 on 22 August 2005 is the 1387th minute in the week, where the week starts on Monday):
+</p>
+	
+<pre>
+&lt;0,   192.168.0.5 - - [22/Aug/2005:22:07:52 +0000] "GET / HTTP/1.1" 200 1722&gt;                  -&gt; &lt;1387, 1&gt;
+&lt;71,  192.168.0.5 - - [22/Aug/2005:22:07:52 +0000] "GET /styles/layout.css HTTP/1.1" 200 2187&gt; -&gt; &lt;1387, 1&gt;
+&lt;159, 192.168.0.5 - - [22/Aug/2005:22:08:00 +0000] "GET /projects.html HTTP/1.1" 200 40247&gt;    -&gt; &lt;1388, 1&gt;
+</pre>
+
+<p>
+Our Reduce then adds up the 1 values emitted by the Map, to produce totals:	
+</p>
+
+<pre>
+&lt;1387, (1, 1)&gt; -&gt; &lt;1387, 2&gt;
+&lt;1388, (1)&gt;    -&gt; &lt;1388, 1&gt;
+</pre>
+
+<p>
+The Reduce output is written out as a tab-separated file. It says there were two requests in the 1387th minute-in-week slot, and one in the 1388th - which is correct.
+</p>
+
+<pre>
+1387	2
+1388	1
+</pre>
+
+<h2>The Code</h2>
+
+<p>
+Let's translate the above ideas into Java code. First we create a class that will run our program:
+</p>
+
+<pre>
+public class AccessLogFileAnalyzer {
+  //...
+}
+</pre>
+
+<p>
+It contains our Map and Reduce inner classes and a main method to launch the job. Here's the Map class:	
+</p>
+
+<pre>
+  public static class MapClass extends MapReduceBase implements Mapper {
+
+    private final static LongWritable ONE = new LongWritable(1);
+
+    private static Pattern p = Pattern
+        .compile("([^ ]*) ([^ ]*) ([^ ]*) \\[([^]]*)\\] \"([^\"]*)\"" +
+                        " ([^ ]*) ([^ ]*).*");
+
+    private static DateTimeFormatter formatter = DateTimeFormat
+        .forPattern("dd/MMM/yyyy:HH:mm:ss Z");
+
+    private IntWritable minute = new IntWritable();
+
+    public void map(WritableComparable key, Writable value,
+        OutputCollector output, Reporter reporter) throws IOException {
+
+      String line = ((Text) value).toString();
+      Matcher matcher = p.matcher(line);
+      if (matcher.matches()) {
+        String timestamp = matcher.group(4);
+        minute.set(getMinuteBucket(timestamp));
+        output.collect(minute, ONE);
+      }
+
+    }
+
+    private int getMinuteBucket(String timestamp) {
+      DateTime dt = formatter.parseDateTime(timestamp);
+      return dt.getMinuteOfDay() + (dt.getDayOfWeek() - 1)
+          * DateTimeConstants.MINUTES_PER_DAY;
+    }
+
+  }
+</pre>
+
+<p>
+The interesting work is done by the <code>map()</code> method, which is specified in the <code>org.apache.hadoop.mapred.Mapper</code> interface. It takes the <code>value</code> parameter that it is passed and casts it to a <code>org.apache.hadoop.io.Text</code> type - we shall see later how this is specified later. The <code>Text</code> object is a Hadoop framework class that can be serialized using Hadoop's serialization protocol and stores text in a UTF-8 encoding. We convert it to a regular Java <code>String</code>, before we use a regular expression for extracting the timestamp field from a <a href="http://www.w3.org/TR/WD-logfile.html">Extended Log File Format</a> record. We call the utility method <code>getMinuteBucket()</code>, which uses the handy <a href="http://joda-time.sourceforge.net/">Joda Time</a> library to convert the timestamp to an integer minute-in-week slot, then write our output to the <code>org.apache.hadoop.mapred.OutputCollector</code>. Notice we use an <code>org.apache.hadoop.io.IntWritable</code> to wrap the key, and a <code>org.apache.hadoop.io.LongWritable</code> to wrap the value, so that Hadoop can serialize the values.
+</p>
+
+<p>
+The Reduce code is much simpler:
+</p>
+
+<pre>
+  public static class ReduceClass extends MapReduceBase implements Reducer {
+
+    public void reduce(WritableComparable key, Iterator values,
+        OutputCollector output, Reporter reporter) throws IOException {
+      int sum = 0;
+      while (values.hasNext()) {
+        sum += ((LongWritable) values.next()).get();
+      }
+      output.collect(key, new LongWritable(sum));
+    }
+  }
+</pre>
+
+<p>
+We simply iterate through the values we are passed, which are the same types as the Map output values (<code>LongWritable</code>), and sum them. The key is also the same as the Map output key, an (<code>IntWritable</code>), and we use it to emit the final key-value pair: the minute-in-week slot, and total hit count for that slot.
+</p>
+
+<p>
+Hadoop actually comes with a library of stock maps and reducers, and in this case we could have used <code>LongSumReducer</code> which does the same as our reducer, but it's useful to see how you can implement your own reducer.
+</p>
+
+<p>
+The final piece of code is the <code>main()</code> method that runs the MapReduce job.
+</p>
+
+<pre>
+  public static void main(String[] args) throws IOException {
+    if (args.length != 2) {
+      System.err
+          .println("Usage: AccessLogFileAnalyzer &lt;input path&gt; &lt;output path&gt;");
+      System.exit(-1);
+    }
+
+    JobConf conf = new JobConf(AccessLogFileAnalyzer.class);
+
+    conf.setInputPath(new Path(args[0]));
+    conf.setOutputPath(new Path(args[1]));
+
+    conf.setOutputKeyClass(IntWritable.class);
+    conf.setOutputValueClass(LongWritable.class);
+
+    conf.setMapperClass(MapClass.class);
+    conf.setCombinerClass(ReduceClass.class);
+    conf.setReducerClass(ReduceClass.class);
+
+    conf.setNumReduceTasks(1);
+
+    JobClient.runJob(conf);
+  }
+</pre>
+
+<p>
+A <code>org.apache.hadoop.mapred.JobConf</code> object hold details of how to run a MapReduce job. First, we specify the input and output directory paths, which are set from the command line arguments. Next, we set the output key-value types, which are the types that the Reducer emits. We didn't set the input types, since the defaults (<code>org.apache.hadoop.io.LongWritable</code> for the beginning of line character offsets, and <code>org.apache.hadoop.io.Text</code> for the lines) are what we need. Also, the input format and output format - how the input files are turned into key-value pairs, and how the output key-value pairs are turned into output files - are not specified since the default is to use text files (as opposed to using a more compact binary format).
+</p>
+
+<p>
+Having set the input and output configuration parameters, we specify the Map and Reduce classes to use. We also set the Combiner class. A Combiner is just a Reduce task that runs in the same process as the Map task after the Map task has finished. The reason this is often a good idea is to greatly reduce the amount of data that has to be sent across the network as input to the Reduce phase. For the current application the reduction in network traffic is stark: rather than serializing as many key-value pairs as there are lines in the input file being processed by the Map task, in the order of 10<sup>7</sup>, the number of pairs emitted after the Combine task runs is the number of distinct minute-in-week slots, 10<sup>4</sup>, a difference of three orders of magnitude.
+</p>
+
+<p>
+The last job configuration setting concerns the number of maps and reduces. Selecting good values for these is <a href="http://wiki.apache.org/lucene-hadoop/HowManyMapsAndReduces">something of an art</a>, but for this application one Reduce task works well, primarily due to the great optimization achieved by the effect of the Combine phase. This is not typical however, as it is common to have a number of Reduces, which produce a corresponding number of output files. The outputs may need to be combined into a single output as a final post-processing step, or they may be input to a further MapReduce job.
+</p>
+
+<p>
+The final line of the program does all the work of submitting the job and waiting for it to finish.
+</p>
+
+<h2>Testing, Testing</h2>
+
+<p>
+Before letting our new program loose on a large cluster of machines it is a good idea to check it works on a small amount of test data. This is easy to do from your IDE. All you need is to put the Hadoop jar (and its dependencies) on the classpath, with your MapReduce job (and its dependencies, Joda Time in this case). When you run the main method of the job it will use a local job runner that runs Hadoop in the same JVM, which allows you to run a debugger, should you need to.</p>
+
+<p>
+We run <code>AccessLogFileAnalyzer</code> with two command line arguments: the first to specify the input directory containing a few small access log files, and the second to specify the (initially non-existent) output directory. After the job completes there is a file called <i>part-00000</i> in the output directory which contains the output key-value pairs for the weekly distribution:
+</p>
+
+<pre>
+0	6
+1	15
+2	30
+3	22
+4	20
+5	25
+...
+10075	6
+10076	10
+10077	11
+10078	4
+10079	4
+</pre>
+
+<p>
+This looks good. So let's try analyzing a big dataset.
+</p>
+
+<h2>Data Considerations</h2>
+
+<p>
+So far we have only focused on the MapReduce programming model, without much regard for where the data comes from. Hadoop is designed to process large datasets, typically larger than can be stored on a single machine, and its MapReduce implementation is tuned to process data that is stored on the <a href="http://lucene.apache.org/hadoop/hdfs_design.html">Hadoop Distributed File System</a> (HDFS). HDFS is another component of Hadoop and was inspired by The Google File System, described in a <a href="http://labs.google.com/papers/gfs.html">paper</a> by Sanjay Ghemawat, Howard Gobioff, and Shun-Tak Leung.
+</p>
+
+<p>
+We have several options about how to get the data into HDFS for processing, including:
+</p>
+
+<ol>
+<li>Write the data to HDFS as it is created.</li>
+<li>Copy the data from the machines it was created on to HDFS.</li>
+<li>Copy the data from the machines it was created on to Amazon S3, then to HDFS.</li>
+</ol>
+
+<p>
+Note that files stored on S3 are not subject to the usual 5GB limitation since there is a special Hadoop filesystem that breaks files into blocks so we can store arbitrarily large files on S3.
+</p>
+
+<p>
+We'll illustrate option 3 for the purposes of this article. And while a full discussion of the pros and cons of each option is beyond the scope of this article, it's worth mentioning that S3 scores well as a persistent store for the log files (it can double as a back up) and it is easy enough to copy them from the web server after they have been rotated at the end of the day. Transfers between S3 and EC2 are free, so we can launch our EC2 Hadoop cluster, transfer the files to it, run our job, then shut down the cluster. This means we only pay for the EC2 instances for as long as the job runs. For very large datasets the time taken to transfer the data from S3 may become prohibitive, in which case it is worth considering storing the data on HDFS on a long-running EC2 cluster.
+</p>
+
+<p>
+Hadoop comes with tools to move files between different filesystems. To copy files from a locally mounted filesystem you would install Hadoop locally, then run a command like:
+</p>
+
+<pre>
+bin/hadoop fs -put /path/to/source /path/to/target
+</pre>
+
+<p>
+The target path is actually a URI. To copy files to S3 we use the <code>s3</code> URI scheme, so we would do something like
+</p>
+
+<pre>
+bin/hadoop fs -put /path/to/source s3://<em>&lt;ID&gt;</em>:<em>&lt;SECRET&gt;</em>@<em>&lt;BUCKET&gt;</em>/path/to/target
+</pre>
+
+<p>
+where <code><em>&lt;ID&gt;</em></code>, <code><em>&lt;SECRET&gt;</em></code>, <code><em>&lt;BUCKET&gt;</em></code> are your Amazon S3 credentials. (Note that since the secret access key can contain slashes, you must remember to escape them by replacing each slash <code>/</code> with the string <code>%2F</code>)
+</p>
+
+<h2>Packaging the Code</h2>
+
+<p>
+How do we get our MapReduce application to the cluster? Simple, we package it in a jar along with its dependencies. It's a bit like a WAR file, except dependent jars go in a <i>lib</i> subdirectory, rather than in <i>WEB-INF/lib</i>. Here's the relevant Ant task for our application:
+</p>
+
+<pre>
+&lt;jar jarfile=&quot;${build.dir}/aws-job.jar&quot;&gt;
+  &lt;fileset dir=&quot;${build.classes}&quot;/&gt;
+  &lt;fileset dir=&quot;${basedir}&quot; includes=&quot;lib/&quot; excludes=&quot;**/hadoop*.jar&quot;/&gt;
+  &lt;manifest&gt;
+    &lt;attribute name=&quot;Main-Class&quot; 
+               value=&quot;org/tiling/hadoop_aws_article/AccessLogFileAnalyzer&quot;/&gt;
+  &lt;/manifest&gt;
+&lt;/jar&gt;
+</pre>
+
+<h2>Launching Our EC2 Hadoop Cluster</h2>
+
+<p>
+Hadoop is packaged as a public EC2 image (an AMI) so it is easy for us to get up and running with a cluster. If the version of Hadoop you want to run is not available - for example, if you want to run a patched version - then it is easy to <a href="http://wiki.apache.org/lucene-hadoop/AmazonEC2">build your own</a>.
+</p>
+
+<p>
+Here we'll just use a stock Hadoop AMI. We can find which versions of Hadoop are available as AMIs by using the Amazon EC2 tools.
+(Version 0.13.0 was used for this article.)
+</p>
+
+<pre>
+ec2-describe-images -a | grep hadoop-ec2-images
+</pre>
+
+<p>
+While it is possible to use the EC2 tools to launch Hadoop instances, Hadoop comes with a set of scripts that make the job of launching a cluster much easier.
+The scripts come with the standard Hadoop distribution, so start by 
+downloading and unpacking the latest version of Hadoop on your local workstation. (The <a href="http://lucene.zones.apache.org:8080/hudson/job/Hadoop-Nightly/">latest nightly build</a> is recommended since it fixes a <a href="https://issues.apache.org/jira/browse/HADOOP-1504">bug</a> in the scripts that at the time of writing is not in an official released version).
+Then edit the EC2 configuration in <i>src/contrib/ec2/bin/hadoop-ec2-env.sh</i> to specify your Amazon Web Service settings, the Hadoop version to run on the cluster (which does not have to match the version of the distribution we unpacked on our workstation), the hostname for the master, and the size of the cluster.	
+</p>
+
+<p>
+The hostname you select should be one you have control over, as you will be asked to set it to point to a particular IP address during launch. Free services such as <a href="http://www.dyndns.com/services/dns/dyndns/">DynDNS</a> make this very easy.
+</p>
+
+<p>
+How big should the cluster be? It depends on the number of maps and reduces, but in most cases make it as big as you can. By default EC2 users are limited to 20 instances, so this is a natural starting point.
+</p>
+
+<p>
+With the configuration out of the way (and see the <a href="">Running Hadoop on EC2 wiki page</a> if you need more pointers) we're ready to go. Here's what to type:
+</p>
+
+<pre>
+bin/hadoop-ec2 run
+</pre>
+
+<p>
+This command does the following:
+</p>
+
+<ol>
+<li>Starts a cluster of Hadoop nodes</li>
+<li>Prompts you to set up DNS with the given IP address</li>
+<li>Formats the HDFS filesystem on the cluster</li>
+<li>Starts the Hadoop daemons on the cluster</li>
+<li>Logs you onto the master node</li>
+</ol>
+
+<p>
+It's also possible to run these commands one at a time, which can be useful for debugging. Type <code>bin/hadoop-ec2</code> for usage instructions.
+</p>
+
+<h2>Moving the Data and Code to the Cluster</h2>
+
+<p>
+The next step is to copy our data from S3 to HDFS on our pristine cluster. First create a <i>logs</i> directory in HDFS, then do the copy using the <code>distcp</code> tool that comes with Hadoop by running the following on the master node:
+</p>
+
+<pre>
+cd /usr/local/hadoop-<em>&lt;version&gt;</em>
+bin/hadoop fs -mkdir logs
+bin/hadoop distcp s3://<em>&lt;ID&gt;</em>:<em>&lt;SECRET&gt;</em>@<em>&lt;BUCKET&gt;</em>/path/to/logs logs
+</pre>
+
+<p>
+We also need to copy our job jar from our workstation by running (from our workstation):
+</p>
+
+<pre>
+. bin/hadoop-ec2-env.sh
+scp $SSH_OPTS /path/to/aws-job.jar root@$MASTER_HOST:
+</pre>
+
+<h2>Running and Monitoring Our Job</h2>
+
+<p>We are ready to run the job at last. From the master node:</p>
+
+<pre>
+bin/hadoop jar ~/aws-job.jar logs out
+</pre>
+
+<p>
+The command line output will periodically report progress. However, it is worth using the web interface to monitor the job, since it gives more information and allows you to drill down into log files running on the various nodes, which can be invaluable in the event of failures. The interface is available at <code>http://<em>&lt;MASTER_HOST&gt;</em>:50030/</code>.
+</p>
+
+<h2>Interpreting the Results</h2>
+
+<p>
+The final summary output is shown in the table below. The system maintains counts of input and output data records and bytes, in this case the job processed just under 100GB of data - six weeks of logs - and it took about 35 minutes. (It should go without saying that this is a great deal faster than processing on a single machine would have taken.)
+</p>
+
+<p>
+It took about 5 minutes to transfer the data (which was compressed - Hadoop can read compressed input data out of the box) from S3 to to HDFS, so the whole job took less than a hour. At $0.10 per instance-hour, this works out at only $2 for the whole job, plus S3 storage and transfer costs - that's external transfer costs, because remember transfers between EC2 and S3 are free.
+</p>
+
+    <table border="2" cellpadding="5" cellspacing="2">
+    <tr>
+      <th><br/></th>
+      <th>Counter</th>
+      <th>Map</th>
+      <th>Reduce</th>
+      <th>Total</th>
+    </tr>
+    
+        <tr>
+          
+            <td rowspan="9">Map-Reduce Framework</td>
+            
+          <td>Map input records</td>
+          <td align="right">449,662,417</td>
+          <td align="right">0</td>
+          <td align="right">449,662,417</td>
+        </tr>
+        
+        <tr>
+          
+          <td>Map output records</td>
+          <td align="right">449,661,579</td>
+          <td align="right">0</td>
+          <td align="right">449,661,579</td>
+        </tr>
+        
+        <tr>
+          
+          <td>Map input bytes</td>
+          <td align="right">105,793,389,172</td>
+          <td align="right">0</td>
+          <td align="right">105,793,389,172</td>
+        </tr>
+        
+        <tr>
+          
+          <td>Map output bytes</td>
+          <td align="right">5,395,938,948</td>
+          <td align="right">0</td>
+          <td align="right">5,395,938,948</td>
+        </tr>
+        
+        <tr>
+          
+          <td>Combine input records</td>
+          <td align="right">449,661,579</td>
+          <td align="right">0</td>
+          <td align="right">449,661,579</td>
+        </tr>
+        
+        <tr>
+          
+          <td>Combine output records</td>
+          <td align="right">60,730</td>
+          <td align="right">0</td>
+          <td align="right">60,730</td>
+        </tr>
+        
+        <tr>
+          
+          <td>Reduce input groups</td>
+          <td align="right">0</td>
+          <td align="right">10,080</td>
+          <td align="right">10,080</td>
+        </tr>
+        
+        <tr>
+          
+          <td>Reduce input records</td>
+          <td align="right">0</td>
+          <td align="right">60,730</td>
+          <td align="right">60,730</td>
+        </tr>
+        
+        <tr>
+          
+          <td>Reduce output records</td>
+          <td align="right">0</td>
+          <td align="right">10,080</td>
+          <td align="right">10,080</td>
+        </tr>
+        
+    </table>
+
+
+<p>
+The output from the job is very small, so we can easily copy it to our workstation then run a simple <a href="http://www.r-project.org/">R</a> script to produce a graph of traffic over the week.
+</p>
+
+<pre>
+png(&quot;web_hits_over_week.png&quot;)
+data &lt;- read.table(&quot;part-00000&quot;)
+plot(data, axes=FALSE, ann=FALSE, type=&quot;p&quot;, pch=&quot;.&quot;)
+lines(c(1440*7,0), c(0, 0), col=&quot;gray&quot;)
+for (i in 0:7) {
+  lines(c(1440,1440)*i, c(0, max(data)), col=&quot;gray&quot;)
+}
+dev.off()
+</pre>
+
+<p>
+<img src="web_hits_over_week.png" alt="Hits by day of week" width="480" height="480"/>	
+</p>
+
+<h2>Don't Forget to Shutdown</h2>
+
+<p>
+We've run our job and we're happy with the results (which we've safely copied from the cluster), so we can shut down the cluster. From our workstation:
+</p>
+
+<pre>
+bin/hadoop-ec2 terminate-cluster
+</pre>
+
+<h2>Your Next MapReduce Application</h2>
+
+<p>
+MapReduce is a great programming model for large scale data processing tasks, and Amazon EC2 is a great place to run your MapReduce programs to process data stored on Amazon S3. In this article we've looked at how to do <i>ad hoc</i> web access log analysis, but there are plenty of other applications that can be expressed as MapReduce programs - applications that process <i>your</i> data. So get writing your data processing programs with Hadoop and use Amazon Web Services to run them at the scale you need.
+</p>
+
+<h2>Resources</h2>
+<ul>
+<li><a href="http://aws.amazon.com/s3">Amazon S3</a> and <a href="http://aws.amazon.com/ec2">Amazon EC2</a>.</li>
+<li>The <a href="http://lucene.apache.org/hadoop/">Hadoop homepage</a>, which has links to downloads, the mailing lists, the wiki, and other resources.</li>
+<li>Wiki pages about <a href="http://wiki.apache.org/lucene-hadoop/AmazonEC2">running Hadoop on Amazon EC2</a> and <a href="http://wiki.apache.org/lucene-hadoop/AmazonS3">running Hadoop with Amazon S3</a>.</li>
+<li><a href="http://labs.google.com/papers/mapreduce.html">MapReduce: Simplified Data Processing on Large Clusters</a> by Jeffrey Dean and Sanjay Ghemawat.</li>
+<li><a href="http://labs.google.com/papers/gfs.html">The Google File System</a> by Sanjay Ghemawat, Howard Gobioff, and Shun-Tak Leung.</li>
+<li><a href="http://lucene.apache.org/hadoop/hdfs_design.html">The Hadoop Distributed File System: Architecture and Design</a> by Dhruba Borthakur.</li>
+ 
+</ul>
+
+</body>
+</html>

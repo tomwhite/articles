@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<project name="article" default="article">
+
+  <!-- Helper tasks -->
+
+  <target name="tag">
+    <replaceregexp file="${file}" match="@&lt;(.*?)&gt;@" replace="&lt;\1&gt;" flags="g"/>
+    <replaceregexp file="${file}" match="@&lt;/(.*?)&gt;@" replace="&lt;/\1&gt;" flags="g"/>
+  </target>
+
+  <target name="tab4">
+    <replaceregexp file="${file}" match="\t" replace="    " flags="g"/>
+  </target>
+
+  <target name="tab2">
+    <replaceregexp file="${file}" match="\t" replace="  " flags="g"/>
+  </target>
+
+  <target name="bold">
+    <replaceregexp file="${file}" match="@open_bold@" replace="&lt;b&gt;" flags="g"/>
+    <replaceregexp file="${file}" match="@close_bold@" replace="&lt;/b&gt;" flags="g"/>
+  </target>
+
+  <target name="snip">
+    <replaceregexp file="${file}" match="@snip_start@.*?@snip_end@" replace="" flags="gs"/>
+  </target>
+
+  <target name="ellipsis">
+    <replaceregexp file="${file}" match="@ellipsis_start@.*?@ellipsis_end@" replace="&lt;b&gt;...&lt;/b&gt;" flags="gs"/>
+  </target>
+
+  <target name="escape">
+    <replaceregexp file="${file}" match="&amp;" replace="&amp;amp;" flags="g"/>
+    <replaceregexp file="${file}" match="&lt;" replace="&amp;lt;" flags="g"/>
+    <replaceregexp file="${file}" match="&gt;" replace="&amp;gt;" flags="g"/>
+    <replaceregexp file="${file}" match="&quot;" replace="&amp;quot;" flags="g"/>
+    <replaceregexp file="${file}" match="&apos;" replace="&amp;apos;" flags="g"/>
+  </target>
+  
+  <target name="strip">
+    <replaceregexp file="${file}" match="@.*?@" replace="" flags="g"/>
+  </target>  
+  
+  <target name="java">
+    <antcall target="tab4">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="snip">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="ellipsis">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="bold">
+      <param name="file" value="build/${file}"/>
+    </antcall>       
+    <loadfile property="${file}"
+      srcFile="build/${file}"/>  
+  </target> 
+  
+  <target name="xml">
+    <antcall target="tab2">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="escape">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="snip">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="ellipsis">
+      <param name="file" value="build/${file}"/>
+    </antcall>
+    <antcall target="bold">
+      <param name="file" value="build/${file}"/>
+    </antcall>    
+    <loadfile property="${file}"
+      srcFile="build/${file}"/>  
+  </target>
+
+  <!-- Main targets -->
+
+  <target name="article">
+    <mkdir dir="build"/>
+    <copy todir="build">
+      <fileset dir="annotated"/>
+    </copy>
+
+    <antcall target="java">
+      <param name="file" value="src/java/org/tiling/computefarm/samples/squares/SquaresClient.java"/>
+    </antcall>
+    <loadfile property="src/java/org/tiling/computefarm/samples/squares/SquaresClient.java"
+      srcFile="build/src/java/org/tiling/computefarm/samples/squares/SquaresClient.java"/>
+
+    <antcall target="java">
+      <param name="file" value="src/java/org/tiling/computefarm/samples/squares/SquaresJob.java"/>
+    </antcall>
+    <loadfile property="src/java/org/tiling/computefarm/samples/squares/SquaresJob.java"
+      srcFile="build/src/java/org/tiling/computefarm/samples/squares/SquaresJob.java"/>
+
+    <antcall target="java">
+      <param name="file" value="src/java/org/tiling/computefarm/samples/squares/SquaresTask.java"/>
+    </antcall>
+    <loadfile property="src/java/org/tiling/computefarm/samples/squares/SquaresTask.java"
+      srcFile="build/src/java/org/tiling/computefarm/samples/squares/SquaresTask.java"/>
+
+    <antcall target="java">
+      <param name="file" value="src/test/org/tiling/computefarm/samples/squares/SquaresJobTest.java"/>
+    </antcall>
+    <loadfile property="src/test/org/tiling/computefarm/samples/squares/SquaresJobTest.java"
+      srcFile="build/src/test/org/tiling/computefarm/samples/squares/SquaresJobTest.java"/>
+
+    <antcall target="xml">
+      <param name="file" value="squares.xml"/>
+    </antcall>
+    <loadfile property="squares.xml"
+      srcFile="build/squares.xml"/>
+
+    <antcall target="java">
+      <param name="file" value="src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingClient.java"/>
+    </antcall>
+    <loadfile property="src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingClient.java"
+      srcFile="build/src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingClient.java"/>
+
+    <antcall target="java">
+      <param name="file" value="src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingJob.java"/>
+    </antcall>
+    <loadfile property="src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingJob.java"
+      srcFile="build/src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingJob.java"/>
+
+    <delete file="article.html"/>
+    <copy file="article_template.html" tofile="article.html">
+      <filterset>
+        <filter token="src/java/org/tiling/computefarm/samples/squares/SquaresClient.java"
+          value="${src/java/org/tiling/computefarm/samples/squares/SquaresClient.java}"/>
+        <filter token="src/java/org/tiling/computefarm/samples/squares/SquaresJob.java"
+          value="${src/java/org/tiling/computefarm/samples/squares/SquaresJob.java}"/>
+        <filter token="src/java/org/tiling/computefarm/samples/squares/SquaresTask.java"
+          value="${src/java/org/tiling/computefarm/samples/squares/SquaresTask.java}"/>
+        <filter token="src/test/org/tiling/computefarm/samples/squares/SquaresJobTest.java"
+          value="${src/test/org/tiling/computefarm/samples/squares/SquaresJobTest.java}"/>
+        <filter token="squares.xml"
+          value="${squares.xml}"/>
+        <filter token="src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingClient.java"
+          value="${src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingClient.java}"/>
+        <filter token="src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingJob.java"
+          value="${src/java/org/tiling/computefarm/samples/nonterminating/NonTerminatingJob.java}"/>
+      </filterset>
+    </copy>
+    <delete dir="build"/>
+  </target>
+  
+  <target name="wc">
+    <copy file="article_template.html" tofile="article-wc.html"/>
+    <antcall target="strip">
+      <param name="file" value="article-wc.html"/>
+    </antcall>
+    <style in="article-wc.html" out="article-wc.txt" style="wc.xsl">
+      <xmlcatalog>
+        <dtd publicId="-//W3C//DTD XHTML 1.0 Strict//EN"
+         location="dtds/xhtml1-strict.dtd"/>
+      </xmlcatalog>
+    </style>
+    <exec executable="wc">
+      <arg line="-w article-wc.txt"/>
+    </exec>
+    <delete file="article-wc.html"/>
+    <delete file="article-wc.txt"/>
+  </target>  
+  
+  <target name="dist" depends="article">
+	<zip destfile="ComputeFarmArticle.zip"
+		basedir="."
+		includes="article.html,images/rep-worker.png" />
+  </target>
+
+</project>

@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<project name="build" default="all">
+
+  <!-- Helper tasks -->
+
+  <target name="strip">
+    <replaceregexp file="${file}" match="@.*?@" replace="" flags="g"/>
+  </target>
+
+  <!-- Main targets -->
+
+  <target name="article">
+  	<ant antfile="build_article.xml"/>
+  </target>
+
+  <target name="validate">
+    <xmlvalidate file="article.html">
+      <dtd publicId="-//W3C//DTD XHTML 1.0 Strict//EN"
+       location="dtds/xhtml1-strict.dtd"/>
+    </xmlvalidate>
+  </target>
+
+  <target name="wc">
+    <copy file="developerworks/my-article/misspellings_template.xml" tofile="article-wc.html"/>
+    <antcall target="strip">
+      <param name="file" value="article-wc.html"/>
+    </antcall>
+    <style in="article-wc.html" out="article-wc.txt" style="wc.xsl">
+      <xmlcatalog>
+        <dtd publicId="-//W3C//DTD XHTML 1.0 Strict//EN"
+         location="dtds/xhtml1-strict.dtd"/>
+      </xmlcatalog>
+    </style>
+    <exec executable="wc">
+      <arg line="-w article-wc.txt"/>
+    </exec>
+    <delete file="article-wc.html"/>
+    <delete file="article-wc.txt"/>
+  </target>
+
+  <target name="compile">
+    <delete dir="classes" />
+    <mkdir dir="classes" />
+    <javac srcdir="src" destdir="classes" excludes="org/tiling/misspelling/matcher/">
+		<classpath>
+			<fileset dir="lib">
+				<include name="**/*.jar"/>
+			</fileset>
+		</classpath>	
+    </javac>
+  </target>
+
+  <target name="dist" depends="compile">
+    <zip destfile="misspellings.zip">
+    	<zipfileset dir="." prefix="misspellings"
+    		includes="README,classes/,lib/,src/"
+         	excludes="misspellings.zip,src/org/tiling/misspelling/matcher/"/>
+       	<zipfileset dir="." includes="test.xml" fullpath="misspellings/build.xml"/>
+	</zip>         
+  </target>
+
+  <target name="all" depends="article,dist"/>
+
+</project>

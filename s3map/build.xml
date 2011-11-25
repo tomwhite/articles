@@ -1,0 +1,57 @@
+<project name="S3Map" default="dist" basedir=".">
+
+	<description>Build file for S3Map.</description>
+
+	<property name="lib" location="lib" />
+	<property name="src" location="src" />
+	<property name="src.main" location="src/main/java" />
+	<property name="build" location="build" />
+	<property name="dist" location="dist" />
+	<property name="version" value="1.0.1" />
+
+	<path id="classpath">
+		<pathelement location="${build}" />
+		<fileset dir="${lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="${build}" quiet="true" />
+	</target>
+
+	<target name="init">
+		<mkdir dir="${build}" />
+	</target>
+
+	<target name="compile" depends="init" description="Compile the source.">
+		<mkdir dir="${build}/classes" />
+		<javac classpathref="classpath" srcdir="${src.main}" destdir="${build}/classes" />
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="${build}/lib" />
+		<jar jarfile="${build}/lib/s3map-${version}.jar" basedir="${build}/classes" />
+	</target>
+	
+	<target name="javadoc" depends="init">
+		<delete dir="${build}/javadoc" quiet="true" />
+		<mkdir dir="${build}/javadoc" />
+		<javadoc packagenames="org.tiling.s3map"
+				sourcepath="${src.main}"
+				defaultexcludes="yes"
+				destdir="${build}/javadoc"
+				windowtitle="S3Map">
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api" />
+		</javadoc>
+	</target>
+
+	<target name="dist" depends="jar,javadoc" description="Generate the distribution.">
+		<mkdir dir="${dist}" />
+		<zip destfile="${dist}/s3map-${version}.zip">
+			<zipfileset dir="${build}" excludes="classes/" prefix="s3map-${version}"/>
+			<zipfileset dir="." includes="src/,build.xml,LICENSE,README" excludes="**/S3MapTest.properties" prefix="s3map-${version}"/>
+		</zip>		
+	</target>
+
+</project>

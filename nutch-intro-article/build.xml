@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="article" default="articles" basedir=".">
+
+  <target name="escapeAndTab4">
+    <replaceregexp file="${file}" match="&amp;" replace="&amp;amp;" flags="g" />
+    <replaceregexp file="${file}" match="&lt;" replace="&amp;lt;" flags="g" />
+    <replaceregexp file="${file}" match="&gt;" replace="&amp;gt;" flags="g" />
+    <replaceregexp file="${file}" match="&quot;" replace="&amp;quot;" flags="g" />
+    <replaceregexp file="${file}" match="&apos;" replace="&amp;apos;" flags="g" />
+    <replaceregexp file="${file}" match="\t" replace="    " flags="g" />
+  </target>
+
+  <target name="articles" depends="article1,article2"/>
+
+  <target name="article1">
+    <copy file="article1_template.html" tofile="article1.html" overwrite="true"/>
+
+    <available file="src" type="dir" property="src.present"/>
+    <antcall target="includeSource"/>
+
+    <zip destfile="nutch-intro-part1.zip"
+           basedir="."
+           includes="article1.html,graphics/Figure-1*" />
+  </target>
+
+  <target name="article2" depends="dist">
+    <copy file="article2_template.html" tofile="article2.html" overwrite="true"/>
+
+    <zip destfile="nutch-intro-part2.zip"
+           basedir="."
+           includes="article2.html,graphics/Figure-2-1.png,graphics/Figure-2-2.png,nutch-intro.zip" />
+  </target>
+
+  <target name="includeSource" if="src.present">
+    <mkdir dir="target"/>
+    <copy todir="target/src">
+      <fileset dir="src"/>
+    </copy>
+
+    <!-- Uncomment and change the following to include Java source code -->
+    <!--antcall target="escapeAndTab4">
+      <param name="file" value="target/src/java/org/tiling/didyoumean/SearchEngine.java"/>
+    </antcall>
+    <loadfile property="src/java/org/tiling/didyoumean/SearchEngine.java"
+      srcFile="target/src/java/org/tiling/didyoumean/SearchEngine.java"/>
+    <replace file="article1.html" token="@@@src/java/org/tiling/didyoumean/SearchEngine.java@@@"
+      value="${src/java/org/tiling/didyoumean/SearchEngine.java}"/-->
+
+    <!--antcall target="escapeAndTab4">
+      <param name="file" value="target/src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java"/>
+    </antcall>
+    <replaceregexp file="target/src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java"
+      match="String\[\] similarWords = spellChecker.suggestSimilar\(queryString, 1\);"
+      replace="&lt;b&gt;\0&lt;/b&gt;"
+      flags="s"/>
+    <loadfile property="src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java"
+      srcFile="target/src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java"/>
+    <replace file="article1.html" token="@@@src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java@@@"
+      value="${src/java/org/tiling/didyoumean/SimpleDidYouMeanParser.java}"/-->
+
+    <delete dir="target/src"/>
+  </target>
+
+  <target name="wc1">
+    <style in="article1_template.html" out="article1-wc.txt" style="wc.xsl">
+      <xmlcatalog>
+        <dtd publicId="-//W3C//DTD XHTML 1.0 Strict//EN" location="dtds/xhtml1-strict.dtd" />
+      </xmlcatalog>
+    </style>
+    <exec executable="wc">
+      <arg line="-w article1-wc.txt" />
+    </exec>
+    <delete file="article1-wc.txt" />
+  </target>
+
+  <target name="wc2">
+    <style in="article2_template.html" out="article2-wc.txt" style="wc.xsl">
+      <xmlcatalog>
+        <dtd publicId="-//W3C//DTD XHTML 1.0 Strict//EN" location="dtds/xhtml1-strict.dtd" />
+      </xmlcatalog>
+    </style>
+    <exec executable="wc">
+      <arg line="-w article2-wc.txt" />
+    </exec>
+    <delete file="article2-wc.txt" />
+  </target>
+
+  <target name="compile">
+    <delete dir="target" />
+    <mkdir dir="target" />
+    <javac srcdir="src" destdir="target" source="1.4">
+      <classpath>
+        <fileset dir="C:/Apps/nutch-0.7.1/">
+          <include name="*.jar" />
+          <include name="lib/*.jar" />
+        </fileset>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar destfile="nutch-intro.jar" basedir="target"/>
+  </target>
+
+  <target name="dist" depends="jar">
+    <zip destfile="nutch-intro.zip">
+      <zipfileset dir="." prefix="nutch-intro"
+          includes="README,nutch-intro.jar,recrawl,src/,tinysite/"
+            excludes="nutch-intro.zip"/>
+      <zipfileset dir="." includes="test.xml" fullpath="misspellings/build.xml"/>
+    </zip>
+  </target>
+</project>

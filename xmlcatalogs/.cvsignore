@@ -1,0 +1,10 @@
+classes
+documents
+resources
+src
+article.html
+test.html
+catalog.xml
+*_catalog.xml
+TEST-*
+xmlcatalogs.zip

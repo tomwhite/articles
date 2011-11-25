@@ -1,0 +1,325 @@
+<?xml-stylesheet type="text/xsl" href="\Tom\workspace\misspellings\developerworks\xsl\dw-document-html-3.0.xsl"?>
+<!-- Authors, please update the line above with the location of the dw-document-html-3.0.xsl file you downloaded to your machine, and update the line below with the location of the dw-document-3.0.xsd file you downloaded to your machine. developerWorks editors may delete the line above. -->
+<dw-document xmlns:dw="http://www.ibm.com/developerWorks/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="\Tom\workspace\misspellings\developerworks\schema\dw-document-3.0.xsd">
+  <!-- 03/10/2004  ARTICLE TEMPLATE LAST UPDATED BY GRETCHEN MOORE -->
+  <!-- DW-ARTICLE
+Required.  If ratings=auto or yes, the stylesheet generates the appropriate content ratings form (based on the primary zone). Level indicates the skill level (1-5). Localsite indicates which dW site this resides on. -->
+  <dw-article toc="auto" ratings="auto" level="3" localsite="worldwide" related_contents="auto">
+    <id domino-uid="" content-id=""/>
+    <!-- META DATA
+Recommended.  Enter unique keywords for this article. For last update, enter the date and your initials. -->
+    <meta name="keywords" content="soundex,metaphone,hamming,levenshtein,spell checking,phonetic matching,string similarity,jazzy"/>
+    <meta name="Last update" content="20040814 TW"/>
+    <!-- CONTENT-AREA
+Required.  Specify the content-area (in previous stylesheet versions, this element was named "zone"). If unsure, leave "none". For multiple content-areas, copy the line below; the line with the primary content area should be first. -->
+    <content-area name="none"/>
+    <!-- TITLE
+Title is required, seriestitle is optional, and subtitle is optional but recommended.  Fill in the seriestitle if this article belongs to a column or a series of articles. -->
+    <title>Spell check algorithms in Java</title>
+    <!-- FORUMURL
+Optional. -->
+    <forumurl url=""/>
+    <!-- DOWNLOAD-FEATURE
+Optional. In previous stylesheet versions, this element was named "zip." For tech zones, specify url-ftp;  for WebSphere and DB2 content, you can code more than one download-feature element and use both url-ftp and url-http attributes. -->
+    <download-feature downloadtype="code" filename="" url-ftp=""/>
+    <!-- PDF
+Optional. The developerWorks staff will generate and link to the PDF as needed. -->
+    <pdf url="" size="xx KB"/>
+    <!-- AUTHOR
+Required.  Create an author tag for each author. Provide author's company name, e-mail address, job title, name, and brief biography. Bio should convey relevant expertise or qualifications to write this article. You must specify either a jobtitle or company (or both) for each author element.  Use email_cc to specify an e-mail address (such as the zone editor's) that should be copied on any e-mails that readers send to the author. -->
+    <author jobtitle="Lead Java Developer" email_cc="Copy email address" email="tom-at-tiling.org" company="Kizoom">
+      <bio>Tom White is Lead Java Developer at Kizoom, a leading UK software company in the delivery of personalised travel information to mobile devices. Clients include the UK's national train operator, the London public transport system, and UK national bus companies. Since its founding in 1999, Kizoom has used all the disciplines from Extreme Programming. Tom has been writing Java programs full time since 1996, using most of the standard and enterprise Java APIs, from client Swing GUIs and graphics to back-end messaging systems. He has a first class honours degree in mathematics from Cambridge University. When not programming, Tom enjoys making his young daughter laugh and watching 1930s Hollywood films. Contact Tom at <a href="mailto:tom-at-tiling.org">tom-at-tiling.org</a>.</bio>
+      <name>Tom White</name>
+    </author>
+    <!-- DATE
+Required; numeric values only, with leading zeros on the day only; month and year are required attributes; day is optional. -->
+    <date day="14" month="8" year="2004"/>
+    <!-- ABSTRACT
+Required.  In previous stylesheet versions, this element was named "miniabstract."  This element does not allow HTML tagging, carriage returns, or special characters.  Must be succinct; this content shows up in e-mail to a friend and search results. Avoid line breaks in the abstract, please. If abstract-extended is null or omitted, this abstract text also shows up in the article itself. -->
+    <abstract>Your article abstract goes here. Summarize the main points of the article or the task the developer will be able to do after reading the article. Put the primary points and key phrases close to the beginning of the abstract, because it may be truncated in search results. Avoid line breaks in the abstract, please.</abstract>
+    <!-- ABSTRACT-EXTENDED
+Optional.  In previous stylesheet versions, this element was named "abstract."  Use this element if you want to use HTML tagging or special characters in the abstract that appears in the article itself, or if you want the article abstract to be longer. Avoid line breaks in the abstract-extended, please.-->
+    <abstract-extended>Many applications involve natural language text entry, and users have come to expect spell check capabilities for text they enter. This article explains how you can add a spell checker to your Java applications using Jazzy, an Open Source Java spell checker API. To understand how Jazzy works, the article looks at both the theory and practice of computer spell checking. It covers the two main approaches to finding "close" matches to dictionary words: phonetic matching algorithms such as Soundex and Metaphone which match words that sound alike, and string similarity algorithms such as the Levenshtein algorithm which measure the "distance" between words when viewed as character sequences.</abstract-extended>
+    <!-- START OF ARTICLE BODY
+The body can contain paragraphs of text, major headings, minor headings, code listings, figures, tables, sidebars, etc. -->
+    <docbody>
+      <heading refname="" type="major" toc="yes">Introduction</heading>
+      <p>
+    Computers are adept at performing rapid searches of large stores of information for a given search term. For fuzzily-defined search terms, however, strategies are required that go beyond na<iuml/>ve exact string matching. This article looks at a few such algorithms for fuzzy string matching, with the emphasis on spell checking - where the "large stores of information" are dictionaries, and "fuzzily-defined search terms" are misspelled words.
+    </p>
+      <heading refname="" type="major" toc="yes">Phonetic matching algorithms</heading>
+      <p>
+    Spelling family names correctly is often a challenge. People with unusual family names often find their name has been mangled when making a booking on the phone. Even common names can be misspelled due to minor variations in spelling even when they sound the same, for instance <i>Smith</i> and <i>Smyth</i>.
+    </p>
+      <p>
+    This rich variety in spelling has led to some interesting algorithms that aim to solve the seemingly simple problem of "which names match ones that sound like <i>x</i>"? For example, when searching for information on family history it is common to want to retrieve records of people whose name is close to yours, to allow for the possibility that your family name has changed over the centuries or has been incorrectly spelled in records.
+    </p>
+      <heading refname="" type="major" toc="yes">Soundex</heading>
+      <p>
+    Margaret K. Odell and Robert C. Russell proposed a solution to this problem that was awarded a patent in 1918 (see <a href="http://www.uspto.gov/">U.S. patent</a> number <a href="http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO1&amp;Sect2=HITOFF&amp;d=PALL&amp;p=1&amp;u=/netahtml/srchnum.htm&amp;r=1&amp;f=G&amp;l=50&amp;s1=1261167.WKU.&amp;OS=PN/1261167&amp;RS=PN/1261167">1261167</a>). It claimed to "provide an index wherein names are entered and grouped phonetically rather than according to the alphabetic construction of the names". This algorithm, or its modern variants collectively known as "Soundex", has been employed to index all US censuses from 1920 onwards, and is a staple of family history software. So how does it work?
+    </p>
+      <p>
+    The basic idea behind the Soundex algorithm is to map letters to a numerical code representing their phonetic group. Thus <i>d</i> and <i>t</i> are in the same group since they sound alike - indeed they are vocalised by a similar mechanism. Vowels are omitted altogether. By applying this mapping to a whole word a phonetic "key" for the word is produced. Words that sound alike will (usually) have the same key - we shall see some exceptions later. For example, the Soundex key for both <i>Smith</i> and <i>Smyth</i> is <code type="inline">S530</code>.
+    </p>
+      <p>
+    One of the most common Soundex variants is the one popularised in Donald E. Knuth's <i>The Art of Computer Programming</i>. <a href="#listing1">Listing 1</a> is a Java implementation that demonstrates the algorithm. For conciseness and simplicity of illustration it uses Java regular expressions, which are only available in release 1.4 onwards.
+    </p>
+      <heading refname="listing1" type="code" toc="no">Listing 1. Knuth's Soundex</heading>
+      <code type="section">
+@src/org/tiling/misspelling/phonetic/KnuthSoundex.java@
+    </code>
+      <p>
+    The code is quite terse, so here is an explanation of what it does:
+    </p>
+      <ol>
+        <li>Normalise the input to capital letters - other characters are dropped (lines 01 to 05).</li>
+        <li>Keep the first character of the word unchanged (lines 06 and 13), and drop subsequent <code type="inline">H</code> or <code type="inline">W</code> characters (line 07).</li>
+        <li>Replace each letter in the word with its phonetic code (lines 08 to 11).</li>
+        <li>Remove adjacent phonetic codes that are the same (line 12). (Note that this means, unlike vowels, intervening <code type="inline">H</code> and <code type="inline">W</code> characters do not act as a barrier to combining runs of letters with the same code.)</li>
+        <li>Drop all vowels (line 14).</li>
+        <li>Construct the Soundex by truncating to four characters (possibly padded with <code type="inline">0</code> characters) (line 15).</li>
+      </ol>
+      <p>
+    To really understand the algorithm it helps to run through it by hand. The right hand column of the code tracks the value of the <code type="inline">word</code> variable starting with the input name <i>Ashcroft</i>. This is a good test case for the algorithm since the <i>s</i> and the <i>c</i> combine despite the intervening <i>h</i>. (Many Soundex implementations found on genealogy websites don't implement this rule correctly.)
+    </p>
+      <heading refname="" type="minor" toc="no">Soundex for spell checking</heading>
+      <p>
+    Unfortunately, Soundex is a poor candidate for spell checking. For a start, words that sound distinct may have the same Soundex (for example, <i>White</i> and <i>Wood</i> both have Soundex <code type="inline">W300</code>). This is not surprising since Soundex was designed to group names that sound <i>alike</i>, not just those that sound <i>identical</i>. While this might be a desirable feature for some applications - such as an application to help telephone operators recognise names spoken to them in a variety of accents - Soundex as it stands is not suitable for spell checking since it produces far too many matches. For instance, the misspelling <i>algorithum</i> matches the following words from my sample dictionary:
+    </p>
+      <p>
+        <i>alacritous, alacrity, alcheringa, alcoran, algeria, algerian, algerians, algiers, algor, algorism, algorithm, algorithmic, algorithmically, algorithms, alizarin, alizarine, alkoran, alleger, allegers, allegoric, allegorical, allegorically, allegories, allegorist, allegorists, allegorizes, allegory, allegretto, allegrettos, allegro, allegros, allocheiria, allochiria, allocortex, allograft, allograph, allographic, allographs</i>
+      </p>
+      <p>
+    Even taking into account the extra matches due to variants of the same word (<i>allegoric, allegorical, allegorically</i>), for a spell-checking algorithm we normally require the matching to be more stringent and weed out the more unlikely matches. The number of matches is also artificially boosted since the ends of long words are ignored as a result of truncating the Soundex code to four characters.
+    </p>
+      <p>
+    Just as different sounding words may have the same Soundex, the reverse situation can also occur. The codes for words that sound identical - called <i>homophones</i> - may have different codes. This may happen because some letters are silent - the <i>p</i> in <i>Thompson</i> (<code type="inline">T512</code>)  <i>vs.</i>
+        <i>Thomson</i> (<code type="inline">T525</code>), or the <i>gh</i> in <i>Leigh</i> (<code type="inline">L200</code>) <i>vs.</i>
+        <i>Lee</i> (<code type="inline">L000</code>). Or the initial letter may differ - <i>Carr</i> (<code type="inline">C600</code>) <i>vs.</i>
+        <i>Karr</i> (<code type="inline">K600</code>) - a problem that the algorithm brings on itself, since it does not map the initial letter to a phonetic digit.
+    </p>
+      <p>
+    The "homophone problem" actually stems from the fact that English has very irregular spelling. While it is hard to quantify the amount of irregularity, it is often claimed that English is more irregular than other languages. On the other hand, one study referred to by David Crystal in <i>The Cambridge Encyclopedia of Language</i> (p214) showed that only 3% of 17,000 words analysed were so unpredictable in spelling that they would have to be learned by rote. As a consequence of irregular spelling, Soundex is not particularly well suited to spell checking. To take one example, the phonetically misspelled <i>lam</i> (<code type="inline">L500</code>) has a different Soundex to the correct form, <i>lamb</i> (<code type="inline">L510</code>). While there are many minor variations of Soundex, they all have scant knowledge of English spelling rules - and, just as importantly, exceptions to these rules. It was this state of affairs that led Lawrence Phillips to find a replacement for Soundex, called <i>Metaphone</i>, which had more knowledge of English pronunciation.
+    </p>
+      <heading refname="" type="major" toc="yes">Metaphone</heading>
+      <p>
+    The idea behind Metaphone, first published in <i>Computer Language</i> magazine in 1990, is to explicitly code common rules of English pronunciation that Soundex doesn't attempt to address. For example, there is an explicit rule that drops a <i>b</i> at the end of the word after <i>m</i>. This rule means <i>lam</i> and <i>lamb</i> now have the same encoding (<code type="inline">LM</code>).
+    </p>
+      <p>
+    Metaphone uses 16 consonant classes represented by the following characters: <code type="inline">B X S K J T F H L M N P R 0 W Y</code>. The <code type="inline">0</code> is a zero, used to represent the <i>th</i> sound. The first letter is retained in the same way as it is in Soundex, and the final code is truncated to four characters, although it is not padded if shorter. Repeated letters are dropped (in general), as are vowels - like Soundex again. The bulk of Metaphone is a set of rules that map letter combinations into the consonant classes. A Java implementation runs to a few hundred lines of code, as exemplified by the Metaphone code in the <a href="http://jakarta.apache.org/commons/codec/">Apache Jakarta Commons Codec</a> project. It is very easy to use; <a href="#listing2">Listing 2</a> is a JUnit test that checks the code for <i>lamb</i>:
+    </p>
+      <heading refname="listing2" type="code" toc="no">Listing 2. Using the Apache Metaphone class.</heading>
+      <code type="section">
+@src/org/tiling/misspelling/test/ApacheMetaphoneTest.java@
+    </code>
+      <p>
+    Metaphone generally improves on Soundex, although there are some flaws in the rules: for instance, <i>Bryan</i> (<code type="inline">BRYN</code>) and <i>Brian</i> (<code type="inline">BRN</code>) should have the same code, as Phillips himself points out. The second version of Metaphone, called <i>Double Metaphone</i>, was published in the <a href="http://www.cuj.com/documents/s=8038/cuj0006philips/">June 2000 issue of the C/C++ Users Journal</a> as an attempt to improve Metaphone's fuzzy matching. Along with some tinkering of the consonant classes, and a break with Soundex by encoding all leading vowels as <code type="inline">A</code>, a more fundamental change was made to allow Double Metaphone to return two codes for words that can be pronounced in more than one way. For example, <i>hegemony</i> can be pronounced with a soft or a hard <i>g</i>, so the algorithm returns both <code type="inline">HJMN</code> and <code type="inline">HKMN</code>. Such examples are a small minority, however, as most words only return a single key. <a href="#listing3">Listing 3</a> exercises the <code type="inline">DoubleMetaphone</code> class:
+    </p>
+      <heading refname="listing3" type="code" toc="no">Listing 3. Using the Apache DoubleMetaphone class.</heading>
+      <code type="section">
+@src/org/tiling/misspelling/test/ApacheDoubleMetaphoneTest.java@
+
+    </code>
+      <p>
+    While Soundex and Metaphone solve phonetic fuzzy matching very well, another ingredient is needed for spell checking - typo correction. A typo occurs when your fingers slip on the keyboard and type <i>labm</i> (<code type="inline">LBM</code>) instead of <i>lamb</i> (<code type="inline">LM</code>). No phonetic code is going to match the misspelling with its replacement since they do sound different; for cases like these we need a concept of string similarity.
+    </p>
+      <heading refname="" type="major" toc="yes">String similarity algorithms</heading>
+      <p>
+    Remember those puzzles where you had to transform one word into another while changing only one letter at a time? For example, <i>ship</i> can be transformed into <i>crow</i> via the intermediate words <i>shop</i>, <i>chop</i>, and <i>crop</i>. This game gives us a simple definition of "distance" between two words: the number of steps it takes to transform one word into the other while changing one letter at each step, and where the word is a dictionary word at each step. Let's call this the <i>puzzle distance</i>. So, for this example the distance between <i>ship</i> and <i>crow</i> is 4.
+    </p>
+      <p>
+    Although we often think of distance as being a physical measurement between two points in space, mathematicians define it more generally - and call it a <i>metric</i>. This allows us to use the concept of distance in different applications; here we are interested in the distance between two character strings (words). The idea is then that for a misspelling, we should look for words that are suitably "close" - using our definition of distance - to the misspelled word. Any definition of a distance metric has to satisfy a handful of properties to qualify - for example, a distance can never be negative - for technical details see <a href="http://www-igm.univ-mlv.fr/~lecroq/seqcomp/">this paper on Sequence Comparison</a> by Christian Charras and Thierry Lecroq.
+    </p>
+      <p>
+    For our purposes, the trick is to find a suitable definition of distance that suggests good spelling corrections. The puzzle distance above is unsuitable for at least one good reason: misspellings are not always one letter away from a correctly spelt word. For instance, there are no "stepping stones" from the misspelling <i>puzzel</i> to any correctly spelt English word.
+    </p>
+      <heading refname="" type="major" toc="yes">Levenshtein distance</heading>
+      <p>
+    The <i>Levenshtein distance</i> is one of a whole class of distance metrics (going by the name of the <i>Dynamic Programming</i> algorithm) that permit three types of operation in transforming the source word <i>x</i> to the target word <i>y</i>:
+    </p>
+      <ul>
+        <li>the <b>substitution</b> of one character of <i>x</i> by a character in <i>y</i>
+        </li>
+        <li>the <b>deletion</b> of a character of <i>x</i>
+        </li>
+        <li>the <b>insertion</b> of a character in <i>y</i>
+        </li>
+      </ul>
+      <p>
+    Each operation has a certain cost, and the total distance is the smallest total cost for transforming word <i>x</i> to word <i>y</i>.
+    It is intuitively plausible that an algorithm based on these operations would work well for spelling correction, since typos are nothing more than these operations interpreted as keying errors. (In fact, the Levenshtein distance is also known as the <i>edit distance</i>.) For example, when I key the word <i>wrong</i> as
+    </p>
+      <ul>
+        <li>
+          <i>wromg</i> (hitting the <i>m</i> key instead of the <i>n</i> key), it is a substitution error; and</li>
+        <li>
+          <i>wromng</i> (hitting the <i>m</i> key as well as the <i>n</i> key), it is a deletion error;</li>
+        <li>
+          <i>wrog</i> (missing the <i>n</i> key), it is an insertion error.</li>
+      </ul>
+      <p>
+    The Dynamic Programming algorithm is essentially a brute-force method that considers all of the different ways of transforming the source word to the target to find the least cost. It is best understood by drawing a grid whose rows correspond to the letters of the source, and whose columns correspond to the letters of the target. The cell at <i>(i, j)</i> represents the smallest distance between the first <i>i</i> letters of the source and the first <i>j</i> letters of the target.
+    </p>
+      <p>For the Levenshtein distance the cost of the deletions and insertions is 1. The cost of substitutions is 1 if the characters differ, otherwise it is 0.
+    To start the algorithm we fill in the first row, which corresponds to an empty source word, so it is the cost of inserting 0, 1, ..., <i>j</i> letters. Similarly the first column corresponds to an empty target word, so it is the cost of deleting 0, 1, ..., <i>i</i> letters. If we take the transformation of <i>pzzel</i> to <i>puzzle</i> as an example, we have the grid shown in <a href="#figure1">Figure 1</a>.
+    </p>
+    <figure>
+      <heading refname="figure1" toc="no" type="figure">Figure 1. The first stage of the Levenshtein algorithm</heading>
+      <img src="figure1.png" width="209" height="216" alt="Figure 1. The first stage of the Levenshtein algorithm"/>
+    </figure>
+      <p>
+    Next we calculate the values in each remaining cell by considering its three neighbours: above, to the left, and diagonally upward and to the left. This is shown schematically in <a href="#figure2">Figure 2</a>.
+    </p>
+      <heading refname="figure2" toc="no" type="figure">Figure 2. How to calculate costs for cells in the grid used during execution of the Levenshtein algorithm</heading>
+      <p>
+        <table cellspacing="0" cellpadding="10" border="1">
+          <tr>
+            <td>
+              <i>diagonal</i>
+            </td>
+            <td align="center">
+              <i>above</i>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <i>left</i>
+            </td>
+            <td>
+        min(<br/>
+              <nbsp/>
+              <nbsp/>
+              <i>diagonal</i> + substitution cost,<br/>
+              <nbsp/>
+              <nbsp/>
+              <i>above</i> + delete cost,<br/>
+              <nbsp/>
+              <nbsp/>
+              <i>left</i> + insert cost<br/>
+        )
+        </td>
+          </tr>
+        </table>
+      </p>
+      <p>
+    The resulting grid for the example is shown in <a href="#figure3">Figure 3</a>. The cost in the bottom right-hand cell, 3, is the Levenshtein distance between <i>pzzel</i> and <i>puzzle</i>.
+    </p>
+    <figure>
+      <heading refname="figure3" toc="no" type="figure">Figure 3. The final stage of the Levenshtein algorithm</heading>
+      <img src="figure3.png" width="209" height="216" alt="Figure 3. The final stage of the Levenshtein algorithm"/>
+    </figure>
+      <p>
+    As a bonus, the algorithm also gives the series of operations, also called <i>alignments</i>, which constitute the transformation. There is often more than one alignment for a pair of words. Alignments correspond to minimum cost paths from the top left-hand cell to the bottom right-hand cell that follow the arrows on the diagram. For instance, the alignment depicted in <a href="#figure4">Figure 4</a> (and shown as red arrows in <a href="#figure3">Figure 3</a>), may be read, character by character, as the following series of operations:
+    </p>
+      <ol>
+        <li>substitute <i>p</i> with <i>p</i> (cost 0)</li>
+        <li>insert <i>u</i> (cost 1)</li>
+        <li>substitute <i>z</i> with <i>z</i> (cost 0)</li>
+        <li>substitute <i>z</i> with <i>z</i> (cost 0)</li>
+        <li>insert <i>l</i> (cost 1)</li>
+        <li>substitute <i>e</i> with <i>e</i> (cost 0)</li>
+        <li>delete <i>l</i> (cost 1)</li>
+      </ol>
+      <heading refname="figure4" toc="no" type="figure">Figure 4. An alignment between pzzel and puzzle</heading>
+      <code type="section">
+p-zz-el
+puzzle-
+    </code>
+      <p>
+    A simple illustrative Java implementation of the Levenshtein algorithm is shown in <a href="#listing5">Listing 5</a>. The <a href="http://jakarta.apache.org/commons/lang/">Apache Jakarta Commons Lang</a> project also provides an implementation in the <a href="http://jakarta.apache.org/commons/lang/api/org/apache/commons/lang/StringUtils.html#getLevenshteinDistance(java.lang.String,%20java.lang.String)">StringUtils</a> class. A limitation of both of these implementations is that they do not scale to large strings, since the storage requirements are <i>O(mn)</i>, where <i>m</i> and <i>n</i> are the lengths of the source and target words, respectively. If we only need to compute the distance, and not alignments, as it usually the case, it is easy to reduce this to <i>O(n)</i>, since only the previous row is required to compute the next. A <a href="http://www.merriampark.com/ldjava.htm">fix</a> has been proposed for the Apache version, but it has not been incorporated as of the current time of writing (version 2.0).
+    </p>
+    <p>
+    Note that the running time for the Levenshtein algorithm is always <i>O(mn)</i>, a fact that means the algorithm is too slow for finding the closest match for a misspelling for very large dictionaries.
+    </p>
+      <heading refname="listing5" type="code" toc="no">Listing 5. An implementation of the Levenshtein distance algorithm.</heading>
+      <code type="section">
+@src/org/tiling/misspelling/metric/LevenshteinDistanceMetric.java@
+    </code>
+
+      <heading refname="" type="major" toc="yes">Jazzy, a Java Open Source spell checker</heading>
+      <p>
+    So far we have considered two approaches to spell checking: phonetic matching and sequence comparison. Since neither of these on its own provides a full solution, perhaps there is a way to combine the two approaches? This is exactly what <a href="http://aspell.sourceforge.net/">GNU Aspell</a> aims to do, to quote from its manual:
+  </p>
+      <blockquote>
+    The magic behind [Aspell] comes from merging Lawrence Philips excellent metaphone algorithm and Ispell's near miss strategy which is inserting a space or hyphen, interchanging two adjacent letters, changing one letter, deleting a letter, or adding a letter.
+    </blockquote>
+      <p>
+        <a href="http://jazzy.sourceforge.net/">Jazzy</a> is a GPL/LGPLed Java spell checker API that is based on Aspell's algorithm (itself written in C++) - let's look at how the algorithm works.
+    </p>
+      <heading refname="" type="minor" toc="no">The spell check algorithm</heading>
+      <p>
+    If the word being spell checked is not in the dictionary, then the algorithm assumes it is misspelled. In this case, follow these steps to build a ranked list of suggested corrections.
+    </p>
+      <ol>
+        <li>
+          <b>[Add close phonetic matches of the misspelling]</b> Add all dictionary words that have the same phonetic code as the misspelled word <i>and</i> whose edit distance from the misspelled word is less than a given threshold.</li>
+        <li>
+          <b>[Add close phonetic matches of the misspelling's near misses]</b> Find all phonetic codes for words that are one edit operation from the misspelled word. For these codes, add all dictionary words that have the same phonetic code as the misspelled word <i>and</i> whose edit distance from the misspelled word is less than a given threshold.</li>
+        <li>
+          <b>[Best guess]</b> If no suggestions have been found, add all dictionary words that have the same phonetic code as the misspelled word <i>and</i> with the smallest edit distance from the misspelled word.</li>
+        <li>
+          <b>[Sort]</b> Sort the words by edit distance, keeping words found at each step together.</li>
+      </ol>
+      <p>
+  The strength of the algorithm is the way it uses edit distance on two levels - at both the word level and the phonetic code level. In practice, this introduces enough fuzziness to produce good suggestions for misspelled words.
+    </p>
+      <p>
+    The edit distance used in Jazzy differs from the Levenshtein distance defined earlier. As well as substitutions, deletions and insertions, there are operations to swap adjacent letters and to change the case of a letter. The cost of the operations is configurable. The default phonetic encoding is Metaphone, although it is possible to use a <a href="http://aspell.sourceforge.net/man-html/7_Adding.html#SECTION00830000000000000000">phonetic transformations rules</a> file, which is a table-driven way of defining transformations like Metaphone. The advantage of using a table-driven approach is that it is easy to configure the spell checker to support other languages.
+    </p>
+      <p>
+    Next we look at how to actually build a spell checker using the API Jazzy provides.
+    </p>
+      <heading refname="" type="minor" toc="no">A Jazzy application</heading>
+      <heading refname="listing6" type="code" toc="no">Listing 6. A simple spell checker.</heading>
+      <code type="section">
+@src/org/tiling/misspelling/app/Suggest.java@
+    </code>
+      <p>
+    The example in <a href="#listing6">Listing 6</a> illustrates how to write a Java spell checker. The <code type="inline">main()</code> method creates a <code type="inline">SpellDictionary</code> from a file specified on the command line. The <code type="inline">SpellDictionaryHashMap</code> implementation stores the words in memory, which is fast but not always appropriate for large dictionaries. (There are disk-based implementations provided for applications where memory is an issue.) The <code type="inline">SpellDictionary</code> is used to construct a <code type="inline">SpellChecker</code> object, which has a <code type="inline">SpellCheckListener</code> registered with it, before being fed lines of input from standard input. The event-based design fits naturally with the user-driven applications spell checkers are typically embedded in. Here the listener (<code type="inline">SuggestionListener</code>) simply writes any misspellings and a list of suggestions to standard output whenever it receives a <code type="inline">SpellCheckEvent</code>. Here's a sample run:
+    </p>
+      <heading refname="figure5" toc="no" type="figure">Figure 5. Spell checking with Jazzy</heading>
+      <code type="section">
+Enter line to spell check (return to exit): choklut biskit
+Misspelling: choklut
+Suggestions: chocolate
+Misspelling: biskit
+Suggestions: biscuit
+Enter line to spell check (return to exit):
+    </code>
+      <p>
+    A more sophisticated application would use Jazzy's support for user dictionary management, performing such tasks as adding new words to the dictionary, ignoring words, automatically replacing repeat misspellings with a chosen correction, and so on. The API documentation for <code type="inline">SpellCheckEvent</code> has more details.
+    </p>
+      <heading refname="" type="major" toc="yes">Conclusion</heading>
+      <p>
+  This article has examined some fuzzy matching algorithms that form the building blocks for building a computer spell checker. These algorithms also have other applications, for instance Levenshtein distance is used in comparing gene sequences, and for plagiarism detection.
+  </p>
+      <p>
+  At the time of writing, Jazzy is still alpha software (version 0.5). There are many areas where improvements and extensions could be made, and since it is open source software anyone can contribute. Work needs doing to mirror the improvements being made in its cousin Aspell. More ambitiously, Jazzy would be an ideal framework for prototyping a context and grammar aware spell checker that uses some of the fruits of natural language processing research, such as using <a href="http://www.cogsci.princeton.edu/~wn/">WordNet</a> rather than a simple list of words.
+
+  </p>
+    </docbody>
+    <relatedlist>
+      <a href="http://www-106.ibm.com/developerworks/java/library/j-text-searching.html">Efficient text searching in Java</a>
+      <a href="http://www-106.ibm.com/developerworks/java/library/j-boundaries/boundaries.html">Finding text boundaries in Java</a>
+    </relatedlist>
+    <resourcelist>
+      <ul>
+        <li>Download the <a href="misspellings.zip">source code</a> used in this article.</li>
+        <li><a href="http://www-cs-faculty.stanford.edu/~knuth/taocp.html"><i>The Art of Computer Programming</i></a>, Volume 3, Sorting and Searching, (Addison-Wesley; 1998), by Donald E. Knuth contains the definitive description of the Soundex algorithm.</li>
+        <li>"Hanging on the Metaphone" (<i>Computer Language</i>, December 1990) by Lawrence Philips is where the first description of the Metaphone algorithm appeared.</li>
+        <li>Philips' refinements to Metahone were published in the following readable article: "<a href="http://www.cuj.com/documents/s=8038/cuj0006philips/">The Double Metaphone Search Algorithm</a>" (<i>C/C++ Users Journal</i>, June 2000)</li>
+        <li><a href="http://books.cambridge.org/0521550505.htm"><i>The Cambridge Encyclopedia of Language</i></a> (Cambridge University Press; 1997), by David Crystal is a very accessible treasure trove of facts about world languages.</li>
+        <li>For more (mathematical) details on Levenshtein distance, and related string distance metrics consult "<a href="">Sequence comparison</a>" by Christian Charras and Thierry Lecroq.</li>
+        <li>Also by Christian Charras and Thierry Lecroq, <a href="http://www-igm.univ-mlv.fr/~lecroq/dynamic.html"><i>Exact String Matching Algorithms</i></a> (King's College London Publications; 2004) is a <i>tour de force</i> in the related area of exact text searching.</li>
+        <li>Try this <a href="http://www-igm.univ-mlv.fr/~lecroq/seqcomp/node2.html">interactive Java applet</a> for calculating Levenshtein distance and showing alignments.</li>
+        <li>Choosing a good <a href="http://wordlist.sourceforge.net/">word list</a> can be just as important as a good spell check algorithm.</li>
+        <li>"<a href="http://www-106.ibm.com/developerworks/java/library/j-text-searching.html">Efficient text searching in Java</a>" (<i>developerWorks</i>, April 1999) looks at text searching algorithms in Unicode.</li>
+        <li>"<a href="http://www-106.ibm.com/developerworks/java/library/j-boundaries/boundaries.html">Finding text boundaries in Java</a>" (<i>developerWorks</i>, July 1999) discusses some of the subtleties of finding text boundaries in international text.</li>
+        <li>Download <a href="http://jazzy.sourceforge.net/">Jazzy, the Java Open Source Spell Checker</a>.</li>
+        <li>Download <a href="http://aspell.sourceforge.net/">GNU Aspell, a Free and Open Source spell checker</a>.</li>
+        <li>Download <a href="http://jakarta.apache.org/commons/codec/">Apache Jakarta Commons Codec</a> for an open source implementation of Soundex, Metaphone and Double Metaphone.</li>
+        <li>Download <a href="http://jakarta.apache.org/commons/lang/">Apache Jakarta Commons Lang</a> for an open source implementation of Levenshtein distance.</li>
+      </ul>
+    </resourcelist>
+  </dw-article>
+</dw-document>
